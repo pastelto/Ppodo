@@ -56,9 +56,10 @@ class MainWindow(QMainWindow):
 
     def _init_ui(self):
         """Initialize UI components."""
-        self.setWindowTitle("🍇 Ppodo (뽀도) - 포도알 뽀모도로 타이머")
-        self.setMinimumSize(900, 650)
-        self.resize(1100, 750)  # Default size
+        self.setWindowTitle(self.lang_manager.t('app_title'))
+        # Better sizing for various resolutions including 1920x1080
+        self.setMinimumSize(800, 600)
+        self.resize(1000, 700)  # Default size - works well on 1920x1080
 
         # Central widget
         central_widget = QWidget()
@@ -71,15 +72,18 @@ class MainWindow(QMainWindow):
         # Header with controls
         header_layout = QHBoxLayout()
 
-        title = QLabel("🍇 Ppodo (뽀도)")
+        app_title = f"🍇 {self.lang_manager.t('app_name')}"
+        if self.lang_manager.get_current_language() == 'ko':
+            app_title = "🍇 Ppodo (뽀도)"
+        title = QLabel(app_title)
         title.setStyleSheet("font-size: 20px; font-weight: bold; color: #E63946;")
         header_layout.addWidget(title)
 
         header_layout.addStretch()
 
         # Mini mode button
-        self.mini_button = QPushButton("🔍 미니 모드")
-        self.mini_button.setToolTip("작은 시계 화면으로 전환")
+        self.mini_button = QPushButton(self.lang_manager.t('btn_mini_mode'))
+        self.mini_button.setToolTip("Mini clock mode")
         self.mini_button.clicked.connect(self._show_mini_mode)
         self.mini_button.setStyleSheet("""
             QPushButton {
@@ -98,8 +102,8 @@ class MainWindow(QMainWindow):
         header_layout.addWidget(self.mini_button)
 
         # Toggle tabs button
-        self.toggle_tabs_button = QPushButton("👁️ 탭 숨기기")
-        self.toggle_tabs_button.setToolTip("할일/통계/뱃지 패널 숨기기/보이기")
+        self.toggle_tabs_button = QPushButton(self.lang_manager.t('btn_toggle_tabs'))
+        self.toggle_tabs_button.setToolTip("Toggle task/stats/badge panels")
         self.toggle_tabs_button.clicked.connect(self._toggle_tabs)
         self.toggle_tabs_button.setStyleSheet("""
             QPushButton {
@@ -118,8 +122,8 @@ class MainWindow(QMainWindow):
         header_layout.addWidget(self.toggle_tabs_button)
 
         # Settings button
-        self.settings_button = QPushButton("⚙️ 설정")
-        self.settings_button.setToolTip("타이머 시간 설정")
+        self.settings_button = QPushButton(self.lang_manager.t('btn_settings'))
+        self.settings_button.setToolTip("Timer and language settings")
         self.settings_button.clicked.connect(self._show_settings)
         self.settings_button.setStyleSheet("""
             QPushButton {
@@ -138,7 +142,10 @@ class MainWindow(QMainWindow):
         header_layout.addWidget(self.settings_button)
 
         # Theme selector
-        theme_label = QLabel("🎨 테마:")
+        theme_text = "🎨 " + ("테마:" if self.lang_manager.get_current_language() == 'ko'
+                             else "Theme:" if self.lang_manager.get_current_language() == 'en'
+                             else "テーマ:")
+        theme_label = QLabel(theme_text)
         theme_label.setStyleSheet("font-size: 13px;")
         header_layout.addWidget(theme_label)
 
@@ -162,7 +169,7 @@ class MainWindow(QMainWindow):
         left_layout = QVBoxLayout()
         left_layout.setSpacing(10)
 
-        self.timer_widget = TimerWidget(self.timer, self.theme_manager)
+        self.timer_widget = TimerWidget(self.timer, self.theme_manager, self.lang_manager)
         left_layout.addWidget(self.timer_widget)
 
         self.grape_widget = GrapeWidget(self.db)
@@ -177,15 +184,15 @@ class MainWindow(QMainWindow):
 
         # Task tab
         self.task_widget = TaskWidget(self.db)
-        self.tabs.addTab(self.task_widget, "📝 할 일")
+        self.tabs.addTab(self.task_widget, self.lang_manager.t('tab_tasks'))
 
         # Stats tab
         self.stats_widget = StatsWidget(self.db)
-        self.tabs.addTab(self.stats_widget, "📊 통계")
+        self.tabs.addTab(self.stats_widget, self.lang_manager.t('tab_stats'))
 
         # Badge tab
         self.badge_widget = BadgeWidget(self.db)
-        self.tabs.addTab(self.badge_widget, "🏆 뱃지")
+        self.tabs.addTab(self.badge_widget, self.lang_manager.t('tab_badges'))
 
         self.content_splitter.addWidget(self.tabs)
         self.content_splitter.setSizes([400, 600])
@@ -195,18 +202,18 @@ class MainWindow(QMainWindow):
         # Control buttons
         button_layout = QHBoxLayout()
 
-        self.start_button = QPushButton("▶ 시작")
+        self.start_button = QPushButton(self.lang_manager.t('btn_start'))
         self.start_button.clicked.connect(self._on_start)
         self.start_button.setMinimumHeight(45)
         # Style will be set by _apply_theme()
 
-        self.pause_button = QPushButton("⏸ 일시정지")
+        self.pause_button = QPushButton(self.lang_manager.t('btn_pause'))
         self.pause_button.clicked.connect(self._on_pause)
         self.pause_button.setEnabled(False)
         self.pause_button.setMinimumHeight(45)
         # Style will be set by _apply_theme()
 
-        self.stop_button = QPushButton("⏹ 중지")
+        self.stop_button = QPushButton(self.lang_manager.t('btn_stop'))
         self.stop_button.clicked.connect(self._on_stop)
         self.stop_button.setEnabled(False)
         self.stop_button.setMinimumHeight(45)

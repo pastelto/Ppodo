@@ -14,9 +14,14 @@ from ui.main_window import MainWindow
 
 def main():
     """Main application entry point."""
+    # Set environment variable for better Qt scaling on Windows
+    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+    os.environ["QT_SCALE_FACTOR"] = "1"
+
     # Enable high DPI scaling for better resolution support
+    # Use Round policy for better compatibility at 1920x1080
     QApplication.setHighDpiScaleFactorRoundingPolicy(
-        Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
+        Qt.HighDpiScaleFactorRoundingPolicy.Round
     )
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)

@@ -11,17 +11,19 @@ from core.timer import PomodoroTimer
 class TimerWidget(QWidget):
     """Widget for displaying Pomodoro timer."""
 
-    def __init__(self, timer: PomodoroTimer, theme_manager=None):
+    def __init__(self, timer: PomodoroTimer, theme_manager=None, lang_manager=None):
         """
         Initialize timer widget.
 
         Args:
             timer: PomodoroTimer instance
             theme_manager: ThemeManager instance for dynamic theming
+            lang_manager: LanguageManager instance for translations
         """
         super().__init__()
         self.timer = timer
         self.theme_manager = theme_manager
+        self.lang_manager = lang_manager
         self._init_ui()
         self._connect_signals()
         self.update_display()
@@ -33,7 +35,8 @@ class TimerWidget(QWidget):
         layout.setContentsMargins(20, 20, 20, 20)
 
         # State indicator
-        self.state_label = QLabel("⏸ 대기 중")
+        initial_state = self.lang_manager.t('state_idle') if self.lang_manager else "⏸ 대기 중"
+        self.state_label = QLabel(initial_state)
         self.state_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.state_label)
 
@@ -50,7 +53,8 @@ class TimerWidget(QWidget):
         self.progress_bar.setMaximum(100)
         self.progress_bar.setValue(0)
         self.progress_bar.setTextVisible(True)
-        self.progress_bar.setFormat("%p% 진행")
+        progress_format = self.lang_manager.t('progress_format') if self.lang_manager else "%p% 진행"
+        self.progress_bar.setFormat(progress_format)
         layout.addWidget(self.progress_bar)
 
         # Current task label
@@ -203,12 +207,20 @@ class TimerWidget(QWidget):
         Args:
             state: Timer state
         """
-        state_icons = {
-            "idle": "⏸ 대기 중",
-            "focus": "🔥 집중 중",
-            "break": "☕ 휴식 중",
-            "paused": "⏸ 일시정지"
-        }
+        if self.lang_manager:
+            state_icons = {
+                "idle": self.lang_manager.t('state_idle'),
+                "focus": self.lang_manager.t('state_focus'),
+                "break": self.lang_manager.t('state_break'),
+                "paused": self.lang_manager.t('state_paused')
+            }
+        else:
+            state_icons = {
+                "idle": "⏸ 대기 중",
+                "focus": "🔥 집중 중",
+                "break": "☕ 휴식 중",
+                "paused": "⏸ 일시정지"
+            }
 
         # Get theme colors
         if self.theme_manager:
@@ -251,6 +263,10 @@ class TimerWidget(QWidget):
             task_title: Task title to display
         """
         if task_title:
-            self.task_label.setText(f"📝 {task_title}")
+            if self.lang_manager:
+                text = self.lang_manager.t('task_current', title=task_title)
+            else:
+                text = f"📝 {task_title}"
+            self.task_label.setText(text)
         else:
             self.task_label.setText("")
