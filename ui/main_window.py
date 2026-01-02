@@ -17,6 +17,8 @@ from ui.level_widget import LevelWidget
 from ui.task_widget import TaskWidget
 from ui.stats_widget import StatsWidget
 from ui.badge_widget import BadgeWidget
+from ui.settings_dialog import SettingsDialog
+from ui.mini_window import MiniWindow
 
 
 class MainWindow(QMainWindow):
@@ -36,6 +38,12 @@ class MainWindow(QMainWindow):
         self.current_task_id = None
         self.current_task_title = None
 
+        # Mini window
+        self.mini_window = None
+
+        # Tabs visible state
+        self.tabs_visible = True
+
         self._init_ui()
         self._connect_signals()
         self._apply_theme()
@@ -53,7 +61,7 @@ class MainWindow(QMainWindow):
         main_layout.setSpacing(15)
         main_layout.setContentsMargins(15, 15, 15, 15)
 
-        # Header with theme selector
+        # Header with controls
         header_layout = QHBoxLayout()
 
         title = QLabel("🍇 Ppodo (뽀도)")
@@ -62,6 +70,67 @@ class MainWindow(QMainWindow):
 
         header_layout.addStretch()
 
+        # Mini mode button
+        self.mini_button = QPushButton("🔍 미니 모드")
+        self.mini_button.setToolTip("작은 시계 화면으로 전환")
+        self.mini_button.clicked.connect(self._show_mini_mode)
+        self.mini_button.setStyleSheet("""
+            QPushButton {
+                background-color: #3498DB;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px 15px;
+                font-size: 13px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #2980B9;
+            }
+        """)
+        header_layout.addWidget(self.mini_button)
+
+        # Toggle tabs button
+        self.toggle_tabs_button = QPushButton("👁️ 탭 숨기기")
+        self.toggle_tabs_button.setToolTip("할일/통계/뱃지 패널 숨기기/보이기")
+        self.toggle_tabs_button.clicked.connect(self._toggle_tabs)
+        self.toggle_tabs_button.setStyleSheet("""
+            QPushButton {
+                background-color: #9B59B6;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px 15px;
+                font-size: 13px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #8E44AD;
+            }
+        """)
+        header_layout.addWidget(self.toggle_tabs_button)
+
+        # Settings button
+        self.settings_button = QPushButton("⚙️ 설정")
+        self.settings_button.setToolTip("타이머 시간 설정")
+        self.settings_button.clicked.connect(self._show_settings)
+        self.settings_button.setStyleSheet("""
+            QPushButton {
+                background-color: #95A5A6;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px 15px;
+                font-size: 13px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #7F8C8D;
+            }
+        """)
+        header_layout.addWidget(self.settings_button)
+
+        # Theme selector
         theme_label = QLabel("🎨 테마:")
         theme_label.setStyleSheet("font-size: 13px;")
         header_layout.addWidget(theme_label)
@@ -79,21 +148,21 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.level_widget)
 
         # Main content splitter (timer + grape on left, tabs on right)
-        content_splitter = QSplitter(Qt.Horizontal)
+        self.content_splitter = QSplitter(Qt.Horizontal)
 
         # Left panel: Timer + Grape
         left_panel = QWidget()
         left_layout = QVBoxLayout()
         left_layout.setSpacing(10)
 
-        self.timer_widget = TimerWidget(self.timer)
+        self.timer_widget = TimerWidget(self.timer, self.theme_manager)
         left_layout.addWidget(self.timer_widget)
 
         self.grape_widget = GrapeWidget(self.db)
         left_layout.addWidget(self.grape_widget)
 
         left_panel.setLayout(left_layout)
-        content_splitter.addWidget(left_panel)
+        self.content_splitter.addWidget(left_panel)
 
         # Right panel: Tabs
         self.tabs = QTabWidget()
@@ -111,10 +180,10 @@ class MainWindow(QMainWindow):
         self.badge_widget = BadgeWidget(self.db)
         self.tabs.addTab(self.badge_widget, "🏆 뱃지")
 
-        content_splitter.addWidget(self.tabs)
-        content_splitter.setSizes([400, 600])
+        self.content_splitter.addWidget(self.tabs)
+        self.content_splitter.setSizes([400, 600])
 
-        main_layout.addWidget(content_splitter)
+        main_layout.addWidget(self.content_splitter)
 
         # Control buttons
         button_layout = QHBoxLayout()
@@ -127,6 +196,8 @@ class MainWindow(QMainWindow):
                 font-size: 15px;
                 font-weight: bold;
                 background-color: #27AE60;
+                color: white;
+                border: none;
                 border-radius: 8px;
             }
             QPushButton:hover {
@@ -138,11 +209,43 @@ class MainWindow(QMainWindow):
         self.pause_button.clicked.connect(self._on_pause)
         self.pause_button.setEnabled(False)
         self.pause_button.setMinimumHeight(45)
+        self.pause_button.setStyleSheet("""
+            QPushButton {
+                font-size: 15px;
+                font-weight: bold;
+                background-color: #F39C12;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #E67E22;
+            }
+            QPushButton:disabled {
+                background-color: #BDC3C7;
+            }
+        """)
 
         self.stop_button = QPushButton("⏹ 중지")
         self.stop_button.clicked.connect(self._on_stop)
         self.stop_button.setEnabled(False)
         self.stop_button.setMinimumHeight(45)
+        self.stop_button.setStyleSheet("""
+            QPushButton {
+                font-size: 15px;
+                font-weight: bold;
+                background-color: #E74C3C;
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }
+            QPushButton:hover {
+                background-color: #C0392B;
+            }
+            QPushButton:disabled {
+                background-color: #BDC3C7;
+            }
+        """)
 
         button_layout.addWidget(self.start_button)
         button_layout.addWidget(self.pause_button)
@@ -167,10 +270,83 @@ class MainWindow(QMainWindow):
         stylesheet = self.theme_manager.apply_stylesheet("main", is_focus)
         self.setStyleSheet(stylesheet)
 
+        # Apply to timer widget
+        if hasattr(self, 'timer_widget'):
+            self.timer_widget.apply_theme()
+
+        # Apply to mini window if exists
+        if self.mini_window and self.mini_window.isVisible():
+            self.mini_window.apply_theme()
+
     def _on_theme_changed(self, theme_name: str):
         """Handle theme change."""
         self.theme_manager.set_theme(theme_name)
         self._apply_theme()
+
+    def _show_settings(self):
+        """Show settings dialog."""
+        # Don't allow changing settings while timer is running
+        if self.timer.is_running():
+            QMessageBox.warning(
+                self,
+                "설정 불가",
+                "타이머가 실행 중일 때는 설정을 변경할 수 없습니다.\n먼저 타이머를 중지해주세요."
+            )
+            return
+
+        # Get current durations
+        focus_mins = self.timer.focus_duration // 60
+        break_mins = self.timer.break_duration // 60
+
+        # Show dialog
+        dialog = SettingsDialog(focus_mins, break_mins, self)
+        if dialog.exec():
+            focus, break_time = dialog.get_settings()
+            self.timer.set_durations(focus, break_time)
+
+            # Update timer display
+            self.timer_widget.update_display()
+
+            QMessageBox.information(
+                self,
+                "설정 완료",
+                f"타이머 설정이 변경되었습니다.\n\n집중 시간: {focus}분\n휴식 시간: {break_time}분"
+            )
+
+    def _toggle_tabs(self):
+        """Toggle tabs panel visibility."""
+        self.tabs_visible = not self.tabs_visible
+
+        if self.tabs_visible:
+            self.tabs.show()
+            self.toggle_tabs_button.setText("👁️ 탭 숨기기")
+        else:
+            self.tabs.hide()
+            self.toggle_tabs_button.setText("👁️ 탭 보이기")
+
+    def _show_mini_mode(self):
+        """Show mini clock mode window."""
+        # Create mini window if not exists
+        if self.mini_window is None:
+            self.mini_window = MiniWindow(self.timer, self.theme_manager)
+            self.mini_window.restore_requested.connect(self._restore_from_mini)
+
+        # Show mini window
+        self.mini_window.show()
+        self.mini_window.raise_()
+        self.mini_window.activateWindow()
+
+        # Hide main window
+        self.hide()
+
+    def _restore_from_mini(self):
+        """Restore from mini mode."""
+        if self.mini_window:
+            self.mini_window.hide()
+
+        self.show()
+        self.raise_()
+        self.activateWindow()
 
     def _on_start(self):
         """Handle start button click."""
@@ -184,10 +360,13 @@ class MainWindow(QMainWindow):
             # Start new focus session
             self.timer.start_focus()
 
+            # Get current timer duration
+            duration_minutes = self.timer.focus_duration // 60
+
             # Create session in database
             self.current_session_id = self.db.start_session(
                 task_id=self.current_task_id,
-                duration=25
+                duration=duration_minutes
             )
 
             # Update UI
@@ -242,9 +421,10 @@ class MainWindow(QMainWindow):
 
         # Show completion message
         profile = self.db.get_profile()
+        duration = self.timer.focus_duration // 60
         message = f"""🎉 집중 완료!
 
-🔥 25분 집중 완료!
+🔥 {duration}분 집중 완료!
 🍇 포도알 +1 획득!
 💫 경험치 +10 XP"""
 
@@ -260,7 +440,8 @@ class MainWindow(QMainWindow):
             for badge in new_badges:
                 message += f"\n  {badge['icon']} {badge['name']}"
 
-        message += "\n\n이제 5분 휴식하세요."
+        break_mins = self.timer.break_duration // 60
+        message += f"\n\n이제 {break_mins}분 휴식하세요."
 
         QMessageBox.information(self, "집중 완료", message)
 
@@ -305,6 +486,10 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         """Handle window close event."""
+        # Close mini window if exists
+        if self.mini_window:
+            self.mini_window.close()
+
         # Close database connection
         self.db.close()
         event.accept()
