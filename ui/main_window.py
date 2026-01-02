@@ -81,47 +81,53 @@ class MainWindow(QMainWindow):
 
         header_layout.addStretch()
 
-        # Mini mode button
+        # Get theme colors for header buttons
+        focus_color = self.theme_manager.get_focus_color()
+        break_color = self.theme_manager.get_break_color()
+        focus_hover = self._darken_color(focus_color, 0.15)
+        break_hover = self._darken_color(break_color, 0.15)
+
+        # Mini mode button - uses focus color
         self.mini_button = QPushButton(self.lang_manager.t('btn_mini_mode'))
         self.mini_button.setToolTip("Mini clock mode")
         self.mini_button.clicked.connect(self._show_mini_mode)
-        self.mini_button.setStyleSheet("""
-            QPushButton {
-                background-color: #3498DB;
+        self.mini_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {focus_color};
                 color: white;
                 border: none;
                 border-radius: 5px;
                 padding: 8px 15px;
                 font-size: 13px;
                 font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #2980B9;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {focus_hover};
+            }}
         """)
         header_layout.addWidget(self.mini_button)
 
-        # Toggle tabs button
+        # Toggle tabs button - uses break color
         self.toggle_tabs_button = QPushButton(self.lang_manager.t('btn_toggle_tabs'))
         self.toggle_tabs_button.setToolTip("Toggle task/stats/badge panels")
         self.toggle_tabs_button.clicked.connect(self._toggle_tabs)
-        self.toggle_tabs_button.setStyleSheet("""
-            QPushButton {
-                background-color: #9B59B6;
+        self.toggle_tabs_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {break_color};
                 color: white;
                 border: none;
                 border-radius: 5px;
                 padding: 8px 15px;
                 font-size: 13px;
                 font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #8E44AD;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {break_hover};
+            }}
         """)
         header_layout.addWidget(self.toggle_tabs_button)
 
-        # Settings button
+        # Settings button - uses neutral gray
         self.settings_button = QPushButton(self.lang_manager.t('btn_settings'))
         self.settings_button.setToolTip("Timer and language settings")
         self.settings_button.clicked.connect(self._show_settings)
@@ -396,7 +402,7 @@ class MainWindow(QMainWindow):
         # Show dialog
         dialog = SettingsDialog(
             focus_mins, break_mins, current_lang,
-            self.lang_manager, self
+            self.lang_manager, self.theme_manager, self
         )
         if dialog.exec():
             focus, break_time, language = dialog.get_settings()
