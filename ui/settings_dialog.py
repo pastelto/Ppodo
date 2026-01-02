@@ -45,7 +45,8 @@ class SettingsDialog(QDialog):
         layout.setSpacing(20)
 
         # Timer settings group
-        timer_group = QGroupBox("⏱️ 타이머 설정")
+        timer_title = self.lang_manager.t('settings_timer') if self.lang_manager else "⏱️ 타이머 설정"
+        timer_group = QGroupBox(timer_title)
         timer_layout = QFormLayout()
         timer_layout.setSpacing(15)
 
@@ -54,7 +55,8 @@ class SettingsDialog(QDialog):
         self.focus_spinbox.setMinimum(1)
         self.focus_spinbox.setMaximum(120)
         self.focus_spinbox.setValue(self.focus_minutes)
-        self.focus_spinbox.setSuffix(" 분")
+        suffix = self.lang_manager.t('settings_minutes') if self.lang_manager else " 분"
+        self.focus_spinbox.setSuffix(suffix)
         self.focus_spinbox.setStyleSheet("""
             QSpinBox {
                 padding: 8px;
@@ -67,7 +69,8 @@ class SettingsDialog(QDialog):
             }
         """)
 
-        focus_label = QLabel("집중 시간:")
+        focus_text = self.lang_manager.t('settings_focus_time') if self.lang_manager else "집중 시간:"
+        focus_label = QLabel(focus_text)
         focus_label.setStyleSheet("font-size: 14px; font-weight: bold;")
         timer_layout.addRow(focus_label, self.focus_spinbox)
 
@@ -76,7 +79,7 @@ class SettingsDialog(QDialog):
         self.break_spinbox.setMinimum(1)
         self.break_spinbox.setMaximum(60)
         self.break_spinbox.setValue(self.break_minutes)
-        self.break_spinbox.setSuffix(" 분")
+        self.break_spinbox.setSuffix(suffix)
         self.break_spinbox.setStyleSheet("""
             QSpinBox {
                 padding: 8px;
@@ -89,7 +92,8 @@ class SettingsDialog(QDialog):
             }
         """)
 
-        break_label = QLabel("휴식 시간:")
+        break_text = self.lang_manager.t('settings_break_time') if self.lang_manager else "휴식 시간:"
+        break_label = QLabel(break_text)
         break_label.setStyleSheet("font-size: 14px; font-weight: bold;")
         timer_layout.addRow(break_label, self.break_spinbox)
 
@@ -137,7 +141,8 @@ class SettingsDialog(QDialog):
         layout.addWidget(lang_group)
 
         # Info label
-        info = QLabel("💡 타이머가 실행 중이 아닐 때만 설정을 변경할 수 있습니다.")
+        info_text = self.lang_manager.t('settings_info') if self.lang_manager else "💡 타이머가 실행 중이 아닐 때만 설정을 변경할 수 있습니다."
+        info = QLabel(info_text)
         info.setStyleSheet("font-size: 12px; color: #666; padding: 10px;")
         info.setWordWrap(True)
         layout.addWidget(info)
@@ -145,7 +150,8 @@ class SettingsDialog(QDialog):
         # Buttons
         button_layout = QHBoxLayout()
 
-        self.save_button = QPushButton("💾 저장")
+        save_text = self.lang_manager.t('btn_save') if self.lang_manager else "💾 저장"
+        self.save_button = QPushButton(save_text)
         self.save_button.clicked.connect(self.accept)
         self.save_button.setStyleSheet("""
             QPushButton {
@@ -162,7 +168,8 @@ class SettingsDialog(QDialog):
             }
         """)
 
-        self.cancel_button = QPushButton("❌ 취소")
+        cancel_text = self.lang_manager.t('btn_cancel') if self.lang_manager else "❌ 취소"
+        self.cancel_button = QPushButton(cancel_text)
         self.cancel_button.clicked.connect(self.reject)
         self.cancel_button.setStyleSheet("""
             QPushButton {

@@ -135,8 +135,8 @@ class LanguageManager:
 
         'en': {
             # Application
-            'app_title': '🍇 Ppodo - Grape Pomodoro Timer',
-            'app_name': 'Ppodo',
+            'app_title': '🍇 Podo - Grape Pomodoro Timer',
+            'app_name': 'Podo',
 
             # Timer states
             'state_idle': '⏸ Idle',
@@ -252,8 +252,8 @@ class LanguageManager:
 
         'ja': {
             # Application
-            'app_title': '🍇 Ppodo - ぶどうポモドーロタイマー',
-            'app_name': 'Ppodo',
+            'app_title': '🍇 ポド - ぶどうポモドーロタイマー',
+            'app_name': 'ポド',
 
             # Timer states
             'state_idle': '⏸ 待機中',

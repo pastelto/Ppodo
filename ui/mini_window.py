@@ -55,7 +55,10 @@ class MiniWindow(QWidget):
         # Header with restore button
         header_layout = QHBoxLayout()
 
-        title = QLabel("🍇 Ppodo")
+        app_name = "🍇 Ppodo"
+        if self.theme_manager and hasattr(self.theme_manager, 'lang_manager'):
+            app_name = f"🍇 {self.theme_manager.lang_manager.t('app_name')}"
+        title = QLabel(app_name)
         title.setStyleSheet("font-size: 14px; font-weight: bold; color: #E63946;")
         header_layout.addWidget(title)
 
