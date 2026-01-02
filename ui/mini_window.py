@@ -113,6 +113,7 @@ class MiniWindow(QWidget):
         # Timer display
         self.time_label = QLabel("25:00")
         self.time_label.setAlignment(Qt.AlignCenter)
+        self.time_label.setMinimumHeight(60)  # Ensure visibility
         font = QFont('Consolas', 42)
         font.setBold(True)
         self.time_label.setFont(font)
@@ -155,6 +156,7 @@ class MiniWindow(QWidget):
             }
             QPushButton:disabled {
                 background-color: #CCCCCC;
+                color: #999999;
             }
         """)
 
