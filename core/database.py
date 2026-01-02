@@ -204,17 +204,24 @@ class Database:
         self.conn.commit()
         return self.cursor.lastrowid
 
-    def complete_session(self, session_id: int):
-        """Mark a session as completed and update stats."""
+    def complete_session(self, session_id: int, collect_grape: bool = True):
+        """
+        Mark a session as completed and update stats.
+
+        Args:
+            session_id: Session ID to complete
+            collect_grape: Whether to collect grape (False for sessions < 15 minutes)
+        """
         self.cursor.execute("""
             UPDATE focus_sessions
             SET completed = 1, ended_at = CURRENT_TIMESTAMP
             WHERE id = ?
         """, (session_id,))
 
-        # Update user profile and grape stats
-        self._add_grape()
-        self._update_streak()
+        # Update user profile and grape stats only if collect_grape is True
+        if collect_grape:
+            self._add_grape()
+            self._update_streak()
 
         self.conn.commit()
 

@@ -161,14 +161,21 @@ class TimerWidget(QWidget):
         super().resizeEvent(event)
         # Adjust timer font size based on widget width
         width = self.width()
-        if width < 300:
-            font_size = 32
-        elif width < 400:
+        height = self.height()
+
+        # Use the smaller dimension to ensure text fits
+        min_dimension = min(width, height)
+
+        if min_dimension < 250:
+            font_size = 28
+        elif min_dimension < 350:
+            font_size = 36
+        elif min_dimension < 450:
             font_size = 48
-        elif width < 600:
-            font_size = 64
+        elif min_dimension < 550:
+            font_size = 56
         else:
-            font_size = 72
+            font_size = 64
 
         font = QFont('Consolas', font_size)
         font.setBold(True)

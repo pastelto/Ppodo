@@ -37,6 +37,7 @@ class MainWindow(QMainWindow):
         self.current_session_id = None
         self.current_task_id = None
         self.current_task_title = None
+        self.collect_grapes_on_complete = True  # Default: collect grapes
 
         # Mini window
         self.mini_window = None
@@ -51,7 +52,8 @@ class MainWindow(QMainWindow):
     def _init_ui(self):
         """Initialize UI components."""
         self.setWindowTitle("🍇 Ppodo (뽀도) - 포도알 뽀모도로 타이머")
-        self.setMinimumSize(1000, 700)
+        self.setMinimumSize(900, 650)
+        self.resize(1100, 750)  # Default size
 
         # Central widget
         central_widget = QWidget()
@@ -191,61 +193,19 @@ class MainWindow(QMainWindow):
         self.start_button = QPushButton("▶ 시작")
         self.start_button.clicked.connect(self._on_start)
         self.start_button.setMinimumHeight(45)
-        self.start_button.setStyleSheet("""
-            QPushButton {
-                font-size: 15px;
-                font-weight: bold;
-                background-color: #27AE60;
-                color: white;
-                border: none;
-                border-radius: 8px;
-            }
-            QPushButton:hover {
-                background-color: #229954;
-            }
-        """)
+        # Style will be set by _apply_theme()
 
         self.pause_button = QPushButton("⏸ 일시정지")
         self.pause_button.clicked.connect(self._on_pause)
         self.pause_button.setEnabled(False)
         self.pause_button.setMinimumHeight(45)
-        self.pause_button.setStyleSheet("""
-            QPushButton {
-                font-size: 15px;
-                font-weight: bold;
-                background-color: #F39C12;
-                color: white;
-                border: none;
-                border-radius: 8px;
-            }
-            QPushButton:hover {
-                background-color: #E67E22;
-            }
-            QPushButton:disabled {
-                background-color: #BDC3C7;
-            }
-        """)
+        # Style will be set by _apply_theme()
 
         self.stop_button = QPushButton("⏹ 중지")
         self.stop_button.clicked.connect(self._on_stop)
         self.stop_button.setEnabled(False)
         self.stop_button.setMinimumHeight(45)
-        self.stop_button.setStyleSheet("""
-            QPushButton {
-                font-size: 15px;
-                font-weight: bold;
-                background-color: #E74C3C;
-                color: white;
-                border: none;
-                border-radius: 8px;
-            }
-            QPushButton:hover {
-                background-color: #C0392B;
-            }
-            QPushButton:disabled {
-                background-color: #BDC3C7;
-            }
-        """)
+        # Style will be set by _apply_theme()
 
         button_layout.addWidget(self.start_button)
         button_layout.addWidget(self.pause_button)
@@ -278,10 +238,90 @@ class MainWindow(QMainWindow):
         if self.mini_window and self.mini_window.isVisible():
             self.mini_window.apply_theme()
 
+        # Apply theme colors to control buttons
+        if hasattr(self, 'start_button'):
+            self._update_button_styles()
+
     def _on_theme_changed(self, theme_name: str):
         """Handle theme change."""
         self.theme_manager.set_theme(theme_name)
         self._apply_theme()
+
+    def _update_button_styles(self):
+        """Update control button styles based on current theme."""
+        # Get theme colors
+        focus_color = self.theme_manager.get_focus_color()
+        break_color = self.theme_manager.get_break_color()
+
+        # Use focus color for start button
+        start_color = focus_color
+        start_hover = self._darken_color(focus_color, 0.15)
+
+        # Use a contrasting color for pause (amber/orange)
+        pause_color = "#F39C12"
+        pause_hover = "#E67E22"
+
+        # Use break color for stop button
+        stop_color = break_color
+        stop_hover = self._darken_color(break_color, 0.15)
+
+        # Apply styles
+        self.start_button.setStyleSheet(f"""
+            QPushButton {{
+                font-size: 15px;
+                font-weight: bold;
+                background-color: {start_color};
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }}
+            QPushButton:hover {{
+                background-color: {start_hover};
+            }}
+        """)
+
+        self.pause_button.setStyleSheet(f"""
+            QPushButton {{
+                font-size: 15px;
+                font-weight: bold;
+                background-color: {pause_color};
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }}
+            QPushButton:hover {{
+                background-color: {pause_hover};
+            }}
+            QPushButton:disabled {{
+                background-color: #BDC3C7;
+            }}
+        """)
+
+        self.stop_button.setStyleSheet(f"""
+            QPushButton {{
+                font-size: 15px;
+                font-weight: bold;
+                background-color: {stop_color};
+                color: white;
+                border: none;
+                border-radius: 8px;
+            }}
+            QPushButton:hover {{
+                background-color: {stop_hover};
+            }}
+            QPushButton:disabled {{
+                background-color: #BDC3C7;
+            }}
+        """)
+
+    def _darken_color(self, hex_color: str, factor: float = 0.2) -> str:
+        """Darken a hex color."""
+        hex_color = hex_color.lstrip('#')
+        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+        r = int(r * (1 - factor))
+        g = int(g * (1 - factor))
+        b = int(b * (1 - factor))
+        return f'#{r:02x}{g:02x}{b:02x}'
 
     def _show_settings(self):
         """Show settings dialog."""
@@ -357,17 +397,39 @@ class MainWindow(QMainWindow):
             self.pause_button.setEnabled(True)
             self.stop_button.setEnabled(True)
         else:
-            # Start new focus session
-            self.timer.start_focus()
-
             # Get current timer duration
             duration_minutes = self.timer.focus_duration // 60
+
+            # Check if duration is less than 15 minutes
+            collect_grapes = True
+            if duration_minutes < 15:
+                reply = QMessageBox.warning(
+                    self,
+                    "⚠️ 포도알 수집 불가",
+                    f"현재 집중 시간이 {duration_minutes}분으로 설정되어 있습니다.\n\n"
+                    "🍇 포도알은 15분 이상 집중했을 때만 모을 수 있습니다.\n\n"
+                    "15분 미만으로 진행하면 포도알을 획득할 수 없습니다.\n"
+                    "그래도 진행하시겠습니까?",
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.No
+                )
+
+                if reply == QMessageBox.No:
+                    return
+                else:
+                    collect_grapes = False
+
+            # Start new focus session
+            self.timer.start_focus()
 
             # Create session in database
             self.current_session_id = self.db.start_session(
                 task_id=self.current_task_id,
                 duration=duration_minutes
             )
+
+            # Store whether to collect grapes
+            self.collect_grapes_on_complete = collect_grapes
 
             # Update UI
             self.start_button.setEnabled(False)
@@ -412,33 +474,44 @@ class MainWindow(QMainWindow):
 
     def _on_focus_completed(self):
         """Handle focus session completion."""
-        # Complete session in database
-        if self.current_session_id:
-            self.db.complete_session(self.current_session_id)
-
-        # Check for new badges
-        new_badges = self.db.check_and_award_badges()
-
-        # Show completion message
-        profile = self.db.get_profile()
         duration = self.timer.focus_duration // 60
-        message = f"""🎉 집중 완료!
+
+        # Complete session in database (with or without grape collection)
+        if self.current_session_id:
+            self.db.complete_session(self.current_session_id, self.collect_grapes_on_complete)
+
+        # Build completion message
+        if self.collect_grapes_on_complete:
+            # Check for new badges
+            new_badges = self.db.check_and_award_badges()
+
+            # Show completion message with grape
+            profile = self.db.get_profile()
+            message = f"""🎉 집중 완료!
 
 🔥 {duration}분 집중 완료!
 🍇 포도알 +1 획득!
 💫 경험치 +10 XP"""
 
-        # Check for level up
-        old_level = profile['level']
-        new_profile = self.db.get_profile()
-        if new_profile['level'] > old_level:
-            message += f"\n\n🎉 레벨업! Level {new_profile['level']} 달성!"
+            # Check for level up
+            old_level = profile['level']
+            new_profile = self.db.get_profile()
+            if new_profile['level'] > old_level:
+                message += f"\n\n🎉 레벨업! Level {new_profile['level']} 달성!"
 
-        # Check for new badges
-        if new_badges:
-            message += f"\n\n🏆 새 뱃지 획득!"
-            for badge in new_badges:
-                message += f"\n  {badge['icon']} {badge['name']}"
+            # Check for new badges
+            if new_badges:
+                message += f"\n\n🏆 새 뱃지 획득!"
+                for badge in new_badges:
+                    message += f"\n  {badge['icon']} {badge['name']}"
+        else:
+            # No grape collection message
+            message = f"""🎉 집중 완료!
+
+🔥 {duration}분 집중 완료!
+
+⚠️ 15분 미만 집중이라 포도알을 획득하지 못했습니다.
+다음부터는 15분 이상 집중하여 포도알을 모아보세요!"""
 
         break_mins = self.timer.break_duration // 60
         message += f"\n\n이제 {break_mins}분 휴식하세요."
@@ -474,6 +547,7 @@ class MainWindow(QMainWindow):
 
         # Clear session
         self.current_session_id = None
+        self.collect_grapes_on_complete = True  # Reset for next session
 
     def _on_task_selected(self, task_id: int, task_title: str):
         """Handle task selection."""
