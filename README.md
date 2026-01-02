@@ -239,7 +239,7 @@ Ppodo/
 
 ## 👤 개발자
 
-**Julie**
+**Dahae Julie Kim**
 
 ---
 
