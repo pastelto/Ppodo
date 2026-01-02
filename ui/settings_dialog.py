@@ -4,30 +4,38 @@ Allows configuration of focus and break durations.
 """
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel,
-    QSpinBox, QPushButton, QGroupBox, QFormLayout
+    QSpinBox, QPushButton, QGroupBox, QFormLayout, QComboBox
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 
 
 class SettingsDialog(QDialog):
     """Dialog for application settings."""
 
-    def __init__(self, current_focus: int = 25, current_break: int = 5, parent=None):
+    # Signal emitted when language changes
+    language_changed = Signal(str)
+
+    def __init__(self, current_focus: int = 25, current_break: int = 5,
+                 current_language: str = 'ko', lang_manager=None, parent=None):
         """
         Initialize settings dialog.
 
         Args:
             current_focus: Current focus duration in minutes
             current_break: Current break duration in minutes
+            current_language: Current language code
+            lang_manager: Language manager instance
             parent: Parent widget
         """
         super().__init__(parent)
-        self.setWindowTitle("⚙️ 설정")
+        self.lang_manager = lang_manager
+        self.setWindowTitle("⚙️ 설정" if not lang_manager else lang_manager.t('settings_title'))
         self.setModal(True)
         self.setMinimumWidth(400)
 
         self.focus_minutes = current_focus
         self.break_minutes = current_break
+        self.current_language = current_language
 
         self._init_ui()
 
@@ -88,6 +96,46 @@ class SettingsDialog(QDialog):
         timer_group.setLayout(timer_layout)
         layout.addWidget(timer_group)
 
+        # Language settings group
+        lang_group = QGroupBox("🌐 언어 설정" if not self.lang_manager else self.lang_manager.t('settings_language'))
+        lang_layout = QFormLayout()
+        lang_layout.setSpacing(15)
+
+        self.language_combo = QComboBox()
+        if self.lang_manager:
+            for code, name in self.lang_manager.SUPPORTED_LANGUAGES.items():
+                self.language_combo.addItem(name, code)
+            # Set current language
+            index = self.language_combo.findData(self.current_language)
+            if index >= 0:
+                self.language_combo.setCurrentIndex(index)
+        else:
+            self.language_combo.addItem("한국어", "ko")
+            self.language_combo.addItem("English", "en")
+            self.language_combo.addItem("日本語", "ja")
+
+        self.language_combo.setStyleSheet("""
+            QComboBox {
+                padding: 8px;
+                font-size: 14px;
+                border: 2px solid #E0E0E0;
+                border-radius: 5px;
+            }
+            QComboBox:focus {
+                border: 2px solid #E63946;
+            }
+            QComboBox::drop-down {
+                border: none;
+            }
+        """)
+
+        lang_label = QLabel("언어:" if not self.lang_manager else self.lang_manager.t('settings_language_label'))
+        lang_label.setStyleSheet("font-size: 14px; font-weight: bold;")
+        lang_layout.addRow(lang_label, self.language_combo)
+
+        lang_group.setLayout(lang_layout)
+        layout.addWidget(lang_group)
+
         # Info label
         info = QLabel("💡 타이머가 실행 중이 아닐 때만 설정을 변경할 수 있습니다.")
         info.setStyleSheet("font-size: 12px; color: #666; padding: 10px;")
@@ -142,6 +190,7 @@ class SettingsDialog(QDialog):
         Get current settings.
 
         Returns:
-            Tuple of (focus_minutes, break_minutes)
+            Tuple of (focus_minutes, break_minutes, language_code)
         """
-        return (self.focus_spinbox.value(), self.break_spinbox.value())
+        language_code = self.language_combo.currentData() if self.language_combo.currentData() else 'ko'
+        return (self.focus_spinbox.value(), self.break_spinbox.value(), language_code)

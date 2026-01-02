@@ -11,6 +11,7 @@ from PySide6.QtGui import QIcon
 from core.database import Database
 from core.timer import PomodoroTimer
 from core.theme import ThemeManager
+from core.i18n import LanguageManager
 from ui.timer_widget import TimerWidget
 from ui.grape_widget import GrapeWidget
 from ui.level_widget import LevelWidget
@@ -32,6 +33,10 @@ class MainWindow(QMainWindow):
         self.db = Database()
         self.timer = PomodoroTimer()
         self.theme_manager = ThemeManager()
+
+        # Initialize language manager with saved preference
+        saved_language = self.db.get_language()
+        self.lang_manager = LanguageManager(saved_language)
 
         # Current session info
         self.current_session_id = None
@@ -242,6 +247,48 @@ class MainWindow(QMainWindow):
         if hasattr(self, 'start_button'):
             self._update_button_styles()
 
+    def _refresh_ui_language(self):
+        """Refresh all UI elements with current language."""
+        # Update window title
+        self.setWindowTitle(self.lang_manager.t('app_title'))
+
+        # Update buttons
+        if hasattr(self, 'start_button'):
+            if self.timer.is_paused():
+                self.start_button.setText(self.lang_manager.t('btn_resume'))
+            else:
+                self.start_button.setText(self.lang_manager.t('btn_start'))
+        if hasattr(self, 'pause_button'):
+            self.pause_button.setText(self.lang_manager.t('btn_pause'))
+        if hasattr(self, 'stop_button'):
+            self.stop_button.setText(self.lang_manager.t('btn_stop'))
+
+        # Update toolbar buttons
+        if hasattr(self, 'settings_button'):
+            self.settings_button.setText(self.lang_manager.t('btn_settings'))
+        if hasattr(self, 'toggle_tabs_button'):
+            self.toggle_tabs_button.setText(self.lang_manager.t('btn_toggle_tabs'))
+        if hasattr(self, 'mini_mode_button'):
+            self.mini_mode_button.setText(self.lang_manager.t('btn_mini_mode'))
+
+        # Update tab labels
+        if hasattr(self, 'tabs'):
+            self.tabs.setTabText(0, self.lang_manager.t('tab_tasks'))
+            self.tabs.setTabText(1, self.lang_manager.t('tab_stats'))
+            self.tabs.setTabText(2, self.lang_manager.t('tab_grapes'))
+            self.tabs.setTabText(3, self.lang_manager.t('tab_level'))
+            self.tabs.setTabText(4, self.lang_manager.t('tab_badges'))
+
+        # Notify widgets to refresh (implement language support in widgets later)
+        # For now, show a message that restart is recommended
+        QMessageBox.information(
+            self,
+            self.lang_manager.t('settings_title'),
+            "언어가 변경되었습니다. 일부 UI 요소는 애플리케이션을 다시 시작해야 완전히 적용됩니다." if self.lang_manager.get_current_language() == 'ko'
+            else "Language changed. Some UI elements require restarting the application for full effect." if self.lang_manager.get_current_language() == 'en'
+            else "言語が変更されました。一部のUI要素は、アプリケーションを再起動すると完全に適用されます。"
+        )
+
     def _on_theme_changed(self, theme_name: str):
         """Handle theme change."""
         self.theme_manager.set_theme(theme_name)
@@ -329,20 +376,30 @@ class MainWindow(QMainWindow):
         if self.timer.is_running():
             QMessageBox.warning(
                 self,
-                "설정 불가",
-                "타이머가 실행 중일 때는 설정을 변경할 수 없습니다.\n먼저 타이머를 중지해주세요."
+                self.lang_manager.t('settings_cannot_change'),
+                self.lang_manager.t('settings_timer_running')
             )
             return
 
-        # Get current durations
+        # Get current durations and language
         focus_mins = self.timer.focus_duration // 60
         break_mins = self.timer.break_duration // 60
+        current_lang = self.lang_manager.get_current_language()
 
         # Show dialog
-        dialog = SettingsDialog(focus_mins, break_mins, self)
+        dialog = SettingsDialog(
+            focus_mins, break_mins, current_lang,
+            self.lang_manager, self
+        )
         if dialog.exec():
-            focus, break_time = dialog.get_settings()
+            focus, break_time, language = dialog.get_settings()
             self.timer.set_durations(focus, break_time)
+
+            # Handle language change
+            if language != current_lang:
+                self.lang_manager.set_language(language)
+                self.db.set_language(language)
+                self._refresh_ui_language()
 
             # Update timer display
             self.timer_widget.update_display()

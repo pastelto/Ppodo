@@ -41,6 +41,7 @@ class TimerWidget(QWidget):
         self.time_label = QLabel("25:00")
         self.time_label.setAlignment(Qt.AlignCenter)
         self.time_label.setWordWrap(True)
+        self.time_label.setMinimumHeight(80)  # Ensure minimum height for visibility
         layout.addWidget(self.time_label, 1)  # Give it stretch
 
         # Progress bar

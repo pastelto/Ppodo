@@ -18,6 +18,7 @@ class Database:
         self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()
         self._create_tables()
+        self._migrate_database()
         self._initialize_badge_definitions()
         self._initialize_user_profile()
 
@@ -100,6 +101,18 @@ class Database:
         """)
 
         self.conn.commit()
+
+    def _migrate_database(self):
+        """Apply database migrations for new features."""
+        # Add language column to user_profile if it doesn't exist
+        try:
+            self.cursor.execute("SELECT language FROM user_profile LIMIT 1")
+        except sqlite3.OperationalError:
+            # Column doesn't exist, add it
+            self.cursor.execute("""
+                ALTER TABLE user_profile ADD COLUMN language TEXT DEFAULT 'ko'
+            """)
+            self.conn.commit()
 
     def _initialize_badge_definitions(self):
         """Initialize 15 badge definitions if they don't exist."""
@@ -341,6 +354,19 @@ class Database:
     def get_xp_for_next_level(self, level: int) -> int:
         """Calculate XP required for next level."""
         return int(100 * (1.5 ** (level - 1)))
+
+    def get_language(self) -> str:
+        """Get user's language preference."""
+        self.cursor.execute("SELECT language FROM user_profile WHERE id = 1")
+        result = self.cursor.fetchone()
+        return result['language'] if result and result['language'] else 'ko'
+
+    def set_language(self, language_code: str):
+        """Set user's language preference."""
+        self.cursor.execute("""
+            UPDATE user_profile SET language = ? WHERE id = 1
+        """, (language_code,))
+        self.conn.commit()
 
     def get_today_stats(self) -> Dict:
         """Get today's statistics."""

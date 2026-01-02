@@ -19,11 +19,17 @@
 
 ## ✨ 주요 기능
 
+### 🌐 다국어 지원 (I18N)
+- **한국어 (Korean)** / **English** / **日本語 (Japanese)** 지원
+- 설정에서 언어 변경 가능
+- 모든 UI 요소 자동 번역
+
 ### 🔥 뽀모도로 타이머
-- **25분 집중 / 5분 휴식** 자동 전환
+- **25분 집중 / 5분 휴식** 자동 전환 (사용자 정의 가능)
 - 시작, 일시정지, 재개, 중지 기능
 - 집중 완료 시 자동 알림
 - 진행률 바와 상태 표시
+- **고해상도 (High DPI) 디스플레이 지원**
 
 ### 🍇 포도알 수집 시스템
 ```
@@ -137,7 +143,8 @@ Ppodo/
 │   ├── __init__.py
 │   ├── timer.py                # 뽀모도로 타이머 로직
 │   ├── database.py             # SQLite 데이터베이스 관리
-│   └── theme.py                # 테마 시스템
+│   ├── theme.py                # 테마 시스템
+│   └── i18n.py                 # 다국어 지원 시스템
 └── ui/
     ├── __init__.py
     ├── main_window.py          # 메인 윈도우
@@ -146,7 +153,9 @@ Ppodo/
     ├── stats_widget.py         # 통계 차트
     ├── grape_widget.py         # 포도알 수집 시스템
     ├── level_widget.py         # 레벨 & 경험치
-    └── badge_widget.py         # 뱃지 컬렉션
+    ├── badge_widget.py         # 뱃지 컬렉션
+    ├── settings_dialog.py      # 설정 다이얼로그
+    └── mini_window.py          # 미니 윈도우
 ```
 
 ---
@@ -255,9 +264,14 @@ This project is created for personal productivity enhancement.
 
 ---
 
-**버전**: 2.0
-**최종 수정일**: 2025-01-02
+**버전**: 2.1
+**최종 수정일**: 2026-01-02
 **개발 시작일**: 2025-01-02
+
+**새로운 기능 (v2.1)**:
+- 🌐 다국어 지원 (한국어, English, 日本語)
+- 📱 고해상도 디스플레이 최적화
+- 🎨 개선된 UI 가시성
 
 ---
 
