@@ -46,11 +46,11 @@ class MiniWindow(QWidget):
 
     def _init_ui(self):
         """Initialize UI components."""
-        self.setFixedSize(280, 180)
+        self.setFixedSize(320, 220)  # Increased size to prevent overlap
 
         layout = QVBoxLayout()
         layout.setContentsMargins(15, 15, 15, 15)
-        layout.setSpacing(10)
+        layout.setSpacing(12)  # Increased spacing
 
         # Header with restore button
         header_layout = QHBoxLayout()
@@ -64,21 +64,33 @@ class MiniWindow(QWidget):
 
         header_layout.addStretch()
 
+        # Get theme colors
+        if self.theme_manager:
+            focus_color = self.theme_manager.get_focus_color()
+            break_color = self.theme_manager.get_break_color()
+            focus_hover = self._darken_color(focus_color, 0.15)
+            break_hover = self._darken_color(break_color, 0.15)
+        else:
+            focus_color = "#27AE60"
+            break_color = "#E74C3C"
+            focus_hover = "#229954"
+            break_hover = "#C0392B"
+
         self.restore_button = QPushButton("⬜")
         self.restore_button.setToolTip("전체 화면으로 돌아가기")
         self.restore_button.clicked.connect(self.restore_requested.emit)
         self.restore_button.setFixedSize(30, 30)
-        self.restore_button.setStyleSheet("""
-            QPushButton {
-                background-color: #27AE60;
+        self.restore_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {focus_color};
                 color: white;
                 border: none;
                 border-radius: 5px;
                 font-size: 12px;
-            }
-            QPushButton:hover {
-                background-color: #229954;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {focus_hover};
+            }}
         """)
         header_layout.addWidget(self.restore_button)
 
@@ -86,17 +98,17 @@ class MiniWindow(QWidget):
         self.close_button.setToolTip("닫기")
         self.close_button.clicked.connect(self.close)
         self.close_button.setFixedSize(30, 30)
-        self.close_button.setStyleSheet("""
-            QPushButton {
-                background-color: #E74C3C;
+        self.close_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {break_color};
                 color: white;
                 border: none;
                 border-radius: 5px;
                 font-size: 12px;
-            }
-            QPushButton:hover {
-                background-color: #C0392B;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {break_hover};
+            }}
         """)
         header_layout.addWidget(self.close_button)
 
@@ -129,38 +141,38 @@ class MiniWindow(QWidget):
         self.start_pause_button = QPushButton("▶")
         self.start_pause_button.setFixedSize(50, 40)
         self.start_pause_button.clicked.connect(self._on_start_pause)
-        self.start_pause_button.setStyleSheet("""
-            QPushButton {
-                background-color: #27AE60;
+        self.start_pause_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {focus_color};
                 color: white;
                 border: none;
                 border-radius: 5px;
                 font-size: 18px;
-            }
-            QPushButton:hover {
-                background-color: #229954;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {focus_hover};
+            }}
         """)
 
         self.stop_button = QPushButton("⏹")
         self.stop_button.setFixedSize(50, 40)
         self.stop_button.setEnabled(False)
         self.stop_button.clicked.connect(self._on_stop)
-        self.stop_button.setStyleSheet("""
-            QPushButton {
-                background-color: #E74C3C;
+        self.stop_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {break_color};
                 color: white;
                 border: none;
                 border-radius: 5px;
                 font-size: 18px;
-            }
-            QPushButton:hover {
-                background-color: #C0392B;
-            }
-            QPushButton:disabled {
+            }}
+            QPushButton:hover {{
+                background-color: {break_hover};
+            }}
+            QPushButton:disabled {{
                 background-color: #CCCCCC;
                 color: #999999;
-            }
+            }}
         """)
 
         button_layout.addStretch()
@@ -289,6 +301,15 @@ class MiniWindow(QWidget):
         """Handle mouse release."""
         if event.button() == Qt.LeftButton:
             self.dragging = False
+
+    def _darken_color(self, hex_color: str, factor: float = 0.2) -> str:
+        """Darken a hex color."""
+        hex_color = hex_color.lstrip('#')
+        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+        r = int(r * (1 - factor))
+        g = int(g * (1 - factor))
+        b = int(b * (1 - factor))
+        return f'#{r:02x}{g:02x}{b:02x}'
 
     def apply_theme(self):
         """Apply theme (called when theme changes)."""

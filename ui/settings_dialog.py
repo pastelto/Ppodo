@@ -16,7 +16,7 @@ class SettingsDialog(QDialog):
     language_changed = Signal(str)
 
     def __init__(self, current_focus: int = 25, current_break: int = 5,
-                 current_language: str = 'ko', lang_manager=None, parent=None):
+                 current_language: str = 'ko', lang_manager=None, theme_manager=None, parent=None):
         """
         Initialize settings dialog.
 
@@ -25,10 +25,12 @@ class SettingsDialog(QDialog):
             current_break: Current break duration in minutes
             current_language: Current language code
             lang_manager: Language manager instance
+            theme_manager: Theme manager instance for button colors
             parent: Parent widget
         """
         super().__init__(parent)
         self.lang_manager = lang_manager
+        self.theme_manager = theme_manager
         self.setWindowTitle("⚙️ 설정" if not lang_manager else lang_manager.t('settings_title'))
         self.setModal(True)
         self.setMinimumWidth(400)
@@ -59,13 +61,53 @@ class SettingsDialog(QDialog):
         self.focus_spinbox.setSuffix(suffix)
         self.focus_spinbox.setStyleSheet("""
             QSpinBox {
-                padding: 8px;
+                padding: 8px 30px 8px 8px;
                 font-size: 14px;
                 border: 2px solid #E0E0E0;
                 border-radius: 5px;
             }
             QSpinBox:focus {
                 border: 2px solid #E63946;
+            }
+            QSpinBox::up-button {
+                subcontrol-origin: border;
+                subcontrol-position: top right;
+                width: 20px;
+                border-left: 1px solid #E0E0E0;
+                border-bottom: 1px solid #E0E0E0;
+                border-top-right-radius: 3px;
+                background: #F5F5F5;
+            }
+            QSpinBox::up-button:hover {
+                background: #E8E8E8;
+            }
+            QSpinBox::up-arrow {
+                image: none;
+                width: 0;
+                height: 0;
+                border-left: 4px solid transparent;
+                border-right: 4px solid transparent;
+                border-bottom: 6px solid #555;
+            }
+            QSpinBox::down-button {
+                subcontrol-origin: border;
+                subcontrol-position: bottom right;
+                width: 20px;
+                border-left: 1px solid #E0E0E0;
+                border-top: 1px solid #E0E0E0;
+                border-bottom-right-radius: 3px;
+                background: #F5F5F5;
+            }
+            QSpinBox::down-button:hover {
+                background: #E8E8E8;
+            }
+            QSpinBox::down-arrow {
+                image: none;
+                width: 0;
+                height: 0;
+                border-left: 4px solid transparent;
+                border-right: 4px solid transparent;
+                border-top: 6px solid #555;
             }
         """)
 
@@ -82,13 +124,53 @@ class SettingsDialog(QDialog):
         self.break_spinbox.setSuffix(suffix)
         self.break_spinbox.setStyleSheet("""
             QSpinBox {
-                padding: 8px;
+                padding: 8px 30px 8px 8px;
                 font-size: 14px;
                 border: 2px solid #E0E0E0;
                 border-radius: 5px;
             }
             QSpinBox:focus {
                 border: 2px solid #E63946;
+            }
+            QSpinBox::up-button {
+                subcontrol-origin: border;
+                subcontrol-position: top right;
+                width: 20px;
+                border-left: 1px solid #E0E0E0;
+                border-bottom: 1px solid #E0E0E0;
+                border-top-right-radius: 3px;
+                background: #F5F5F5;
+            }
+            QSpinBox::up-button:hover {
+                background: #E8E8E8;
+            }
+            QSpinBox::up-arrow {
+                image: none;
+                width: 0;
+                height: 0;
+                border-left: 4px solid transparent;
+                border-right: 4px solid transparent;
+                border-bottom: 6px solid #555;
+            }
+            QSpinBox::down-button {
+                subcontrol-origin: border;
+                subcontrol-position: bottom right;
+                width: 20px;
+                border-left: 1px solid #E0E0E0;
+                border-top: 1px solid #E0E0E0;
+                border-bottom-right-radius: 3px;
+                background: #F5F5F5;
+            }
+            QSpinBox::down-button:hover {
+                background: #E8E8E8;
+            }
+            QSpinBox::down-arrow {
+                image: none;
+                width: 0;
+                height: 0;
+                border-left: 4px solid transparent;
+                border-right: 4px solid transparent;
+                border-top: 6px solid #555;
             }
         """)
 
@@ -153,37 +235,55 @@ class SettingsDialog(QDialog):
         save_text = self.lang_manager.t('btn_save') if self.lang_manager else "💾 저장"
         self.save_button = QPushButton(save_text)
         self.save_button.clicked.connect(self.accept)
-        self.save_button.setStyleSheet("""
-            QPushButton {
-                background-color: #27AE60;
+
+        # Use theme colors if available
+        if self.theme_manager:
+            focus_color = self.theme_manager.get_focus_color()
+            focus_hover = self._darken_color(focus_color, 0.15)
+        else:
+            focus_color = "#27AE60"
+            focus_hover = "#229954"
+
+        self.save_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {focus_color};
                 color: white;
                 border: none;
                 border-radius: 5px;
                 padding: 10px 20px;
                 font-size: 14px;
                 font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #229954;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {focus_hover};
+            }}
         """)
 
         cancel_text = self.lang_manager.t('btn_cancel') if self.lang_manager else "❌ 취소"
         self.cancel_button = QPushButton(cancel_text)
         self.cancel_button.clicked.connect(self.reject)
-        self.cancel_button.setStyleSheet("""
-            QPushButton {
-                background-color: #E74C3C;
+
+        # Use theme colors if available
+        if self.theme_manager:
+            break_color = self.theme_manager.get_break_color()
+            break_hover = self._darken_color(break_color, 0.15)
+        else:
+            break_color = "#E74C3C"
+            break_hover = "#C0392B"
+
+        self.cancel_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {break_color};
                 color: white;
                 border: none;
                 border-radius: 5px;
                 padding: 10px 20px;
                 font-size: 14px;
                 font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #C0392B;
-            }
+            }}
+            QPushButton:hover {{
+                background-color: {break_hover};
+            }}
         """)
 
         button_layout.addWidget(self.save_button)
@@ -191,6 +291,15 @@ class SettingsDialog(QDialog):
 
         layout.addLayout(button_layout)
         self.setLayout(layout)
+
+    def _darken_color(self, hex_color: str, factor: float = 0.2) -> str:
+        """Darken a hex color."""
+        hex_color = hex_color.lstrip('#')
+        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+        r = int(r * (1 - factor))
+        g = int(g * (1 - factor))
+        b = int(b * (1 - factor))
+        return f'#{r:02x}{g:02x}{b:02x}'
 
     def get_settings(self):
         """
