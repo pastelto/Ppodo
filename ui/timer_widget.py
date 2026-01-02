@@ -4,21 +4,24 @@ Shows countdown timer with progress bar and state indicator.
 """
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QProgressBar
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
 from core.timer import PomodoroTimer
 
 
 class TimerWidget(QWidget):
     """Widget for displaying Pomodoro timer."""
 
-    def __init__(self, timer: PomodoroTimer):
+    def __init__(self, timer: PomodoroTimer, theme_manager=None):
         """
         Initialize timer widget.
 
         Args:
             timer: PomodoroTimer instance
+            theme_manager: ThemeManager instance for dynamic theming
         """
         super().__init__()
         self.timer = timer
+        self.theme_manager = theme_manager
         self._init_ui()
         self._connect_signals()
         self.update_display()
@@ -31,26 +34,14 @@ class TimerWidget(QWidget):
 
         # State indicator
         self.state_label = QLabel("⏸ 대기 중")
-        self.state_label.setStyleSheet("""
-            font-size: 16px;
-            font-weight: bold;
-            color: #666;
-            padding: 10px;
-        """)
         self.state_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.state_label)
 
         # Timer display (MM:SS)
         self.time_label = QLabel("25:00")
-        self.time_label.setStyleSheet("""
-            font-size: 72px;
-            font-weight: bold;
-            font-family: 'Consolas', 'Courier New', monospace;
-            color: #2B2D42;
-            padding: 20px;
-        """)
         self.time_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.time_label)
+        self.time_label.setWordWrap(True)
+        layout.addWidget(self.time_label, 1)  # Give it stretch
 
         # Progress bar
         self.progress_bar = QProgressBar()
@@ -59,36 +50,129 @@ class TimerWidget(QWidget):
         self.progress_bar.setValue(0)
         self.progress_bar.setTextVisible(True)
         self.progress_bar.setFormat("%p% 진행")
-        self.progress_bar.setStyleSheet("""
-            QProgressBar {
-                border: 3px solid #E63946;
+        layout.addWidget(self.progress_bar)
+
+        # Current task label
+        self.task_label = QLabel("")
+        self.task_label.setAlignment(Qt.AlignCenter)
+        self.task_label.setWordWrap(True)
+        layout.addWidget(self.task_label)
+
+        layout.addStretch()
+        self.setLayout(layout)
+
+        # Update styles
+        self._update_styles()
+
+    def _update_styles(self):
+        """Update widget styles based on current state and theme."""
+        # Get theme colors
+        if self.theme_manager:
+            is_focus = self.timer.is_focus()
+            theme_color = self.theme_manager.get_current_color(is_focus)
+        else:
+            theme_color = "#E63946"
+
+        # State label style
+        state_colors = {
+            "idle": "#666",
+            "focus": theme_color if self.theme_manager else "#E63946",
+            "break": self.theme_manager.get_break_color() if self.theme_manager else "#A8DADC",
+            "paused": "#FFB703"
+        }
+
+        current_state = self.timer.state.value if hasattr(self.timer, 'state') else "idle"
+        color = state_colors.get(current_state, "#666")
+
+        self.state_label.setStyleSheet(f"""
+            font-size: 16px;
+            font-weight: bold;
+            color: {color};
+            padding: 10px;
+        """)
+
+        # Timer label - responsive font size
+        font = QFont('Consolas', 48)
+        font.setBold(True)
+        self.time_label.setFont(font)
+        self.time_label.setStyleSheet("""
+            color: #2B2D42;
+            padding: 20px;
+        """)
+
+        # Task label
+        self.task_label.setStyleSheet("""
+            font-size: 14px;
+            color: #666;
+            padding: 5px;
+        """)
+
+        # Update progress bar color
+        self._update_progress_bar_style()
+
+    def _update_progress_bar_style(self):
+        """Update progress bar style based on current state."""
+        if self.theme_manager:
+            is_focus = self.timer.is_focus()
+            theme_color = self.theme_manager.get_current_color(is_focus)
+        else:
+            theme_color = "#E63946"
+
+        state = self.timer.state.value if hasattr(self.timer, 'state') else "idle"
+
+        if state == "focus":
+            border_color = theme_color
+            chunk_color = f"qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 {theme_color}, stop:1 {self._lighten_color(theme_color)})"
+        elif state == "break":
+            break_color = self.theme_manager.get_break_color() if self.theme_manager else "#A8DADC"
+            border_color = break_color
+            chunk_color = f"qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 {break_color}, stop:1 {self._lighten_color(break_color)})"
+        else:
+            border_color = "#999999"
+            chunk_color = "#CCCCCC"
+
+        self.progress_bar.setStyleSheet(f"""
+            QProgressBar {{
+                border: 3px solid {border_color};
                 border-radius: 10px;
                 text-align: center;
                 height: 30px;
                 font-size: 13px;
                 font-weight: bold;
                 background-color: #F5F5F5;
-            }
-            QProgressBar::chunk {
-                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                                                   stop:0 #E63946, stop:1 #FF6B6B);
+            }}
+            QProgressBar::chunk {{
+                background-color: {chunk_color};
                 border-radius: 7px;
-            }
+            }}
         """)
-        layout.addWidget(self.progress_bar)
 
-        # Current task label
-        self.task_label = QLabel("")
-        self.task_label.setStyleSheet("""
-            font-size: 14px;
-            color: #666;
-            padding: 5px;
-        """)
-        self.task_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.task_label)
+    def _lighten_color(self, hex_color: str, factor: float = 0.3) -> str:
+        """Lighten a hex color."""
+        hex_color = hex_color.lstrip('#')
+        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+        r = min(255, int(r + (255 - r) * factor))
+        g = min(255, int(g + (255 - g) * factor))
+        b = min(255, int(b + (255 - b) * factor))
+        return f'#{r:02x}{g:02x}{b:02x}'
 
-        layout.addStretch()
-        self.setLayout(layout)
+    def resizeEvent(self, event):
+        """Handle resize event to adjust font size."""
+        super().resizeEvent(event)
+        # Adjust timer font size based on widget width
+        width = self.width()
+        if width < 300:
+            font_size = 32
+        elif width < 400:
+            font_size = 48
+        elif width < 600:
+            font_size = 64
+        else:
+            font_size = 72
+
+        font = QFont('Consolas', font_size)
+        font.setBold(True)
+        self.time_label.setFont(font)
 
     def _connect_signals(self):
         """Connect timer signals to update methods."""
@@ -118,10 +202,18 @@ class TimerWidget(QWidget):
             "paused": "⏸ 일시정지"
         }
 
+        # Get theme colors
+        if self.theme_manager:
+            focus_color = self.theme_manager.get_focus_color()
+            break_color = self.theme_manager.get_break_color()
+        else:
+            focus_color = "#E63946"
+            break_color = "#A8DADC"
+
         state_colors = {
             "idle": "#666",
-            "focus": "#E63946",
-            "break": "#A8DADC",
+            "focus": focus_color,
+            "break": break_color,
             "paused": "#FFB703"
         }
 
@@ -136,32 +228,12 @@ class TimerWidget(QWidget):
             padding: 10px;
         """)
 
-        # Update progress bar color
-        if state == "focus":
-            chunk_color = "qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #E63946, stop:1 #FF6B6B)"
-            border_color = "#E63946"
-        elif state == "break":
-            chunk_color = "qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #A8DADC, stop:1 #B8E9EB)"
-            border_color = "#A8DADC"
-        else:
-            chunk_color = "#CCCCCC"
-            border_color = "#999999"
+        # Update progress bar style with theme colors
+        self._update_progress_bar_style()
 
-        self.progress_bar.setStyleSheet(f"""
-            QProgressBar {{
-                border: 3px solid {border_color};
-                border-radius: 10px;
-                text-align: center;
-                height: 30px;
-                font-size: 13px;
-                font-weight: bold;
-                background-color: #F5F5F5;
-            }}
-            QProgressBar::chunk {{
-                background-color: {chunk_color};
-                border-radius: 7px;
-            }}
-        """)
+    def apply_theme(self):
+        """Apply current theme to the widget."""
+        self._update_styles()
 
     def set_current_task(self, task_title: str):
         """
