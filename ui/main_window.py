@@ -254,6 +254,10 @@ class MainWindow(QMainWindow):
         if hasattr(self, 'timer_widget'):
             self.timer_widget.apply_theme()
 
+        # Apply to task widget
+        if hasattr(self, 'task_widget'):
+            self.task_widget.apply_theme()
+
         # Apply to mini window if exists
         if self.mini_window and self.mini_window.isVisible():
             self.mini_window.apply_theme()
