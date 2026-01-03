@@ -96,13 +96,14 @@ class TimerWidget(QWidget):
             padding: 10px;
         """)
 
-        # Timer label - responsive font size
+        # Timer label - responsive font size with better visibility
         font = QFont('Consolas', 48)
         font.setBold(True)
         self.time_label.setFont(font)
         self.time_label.setStyleSheet("""
-            color: #2B2D42;
+            color: #1A1A1A;
             padding: 20px;
+            background-color: transparent;
         """)
 
         # Task label

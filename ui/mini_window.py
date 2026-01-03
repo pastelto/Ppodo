@@ -46,11 +46,13 @@ class MiniWindow(QWidget):
 
     def _init_ui(self):
         """Initialize UI components."""
-        self.setFixedSize(320, 220)  # Increased size to prevent overlap
+        # Increased size for better visibility
+        self.setFixedSize(350, 240)
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(15, 15, 15, 15)
-        layout.setSpacing(12)  # Increased spacing
+        # Consistent padding throughout
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(15)  # Increased spacing for better separation
 
         # Header with restore button
         header_layout = QHBoxLayout()
@@ -125,21 +127,23 @@ class MiniWindow(QWidget):
         """)
         layout.addWidget(self.state_label)
 
-        # Timer display
+        # Timer display - larger and more visible
         self.time_label = QLabel("25:00")
         self.time_label.setAlignment(Qt.AlignCenter)
-        self.time_label.setMinimumHeight(60)  # Ensure visibility
-        font = QFont('Consolas', 42)
+        self.time_label.setMinimumHeight(70)  # Ensure full visibility
+        font = QFont('Consolas', 44)
         font.setBold(True)
         self.time_label.setFont(font)
-        self.time_label.setStyleSheet("color: #2B2D42; padding: 10px;")
-        layout.addWidget(self.time_label)
+        # Consistent padding
+        self.time_label.setStyleSheet("color: #2B2D42; padding: 15px;")
+        layout.addWidget(self.time_label, 1)  # Give it stretch priority
 
-        # Control buttons
+        # Control buttons with consistent spacing
         button_layout = QHBoxLayout()
+        button_layout.setSpacing(15)  # Consistent spacing between buttons
 
         self.start_pause_button = QPushButton("▶")
-        self.start_pause_button.setFixedSize(50, 40)
+        self.start_pause_button.setFixedSize(55, 45)  # Slightly larger buttons
         self.start_pause_button.clicked.connect(self._on_start_pause)
         self.start_pause_button.setStyleSheet(f"""
             QPushButton {{
@@ -155,7 +159,7 @@ class MiniWindow(QWidget):
         """)
 
         self.stop_button = QPushButton("⏹")
-        self.stop_button.setFixedSize(50, 40)
+        self.stop_button.setFixedSize(55, 45)  # Matching button size
         self.stop_button.setEnabled(False)
         self.stop_button.clicked.connect(self._on_stop)
         self.stop_button.setStyleSheet(f"""

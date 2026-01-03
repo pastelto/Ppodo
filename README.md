@@ -139,15 +139,16 @@ Ppodo/
 ├── main.py                      # 애플리케이션 진입점
 ├── requirements.txt             # 의존성 목록
 ├── README.md                    # 프로젝트 문서
-├── core/
+├── core/                        # 비즈니스 로직
 │   ├── __init__.py
 │   ├── timer.py                # 뽀모도로 타이머 로직
 │   ├── database.py             # SQLite 데이터베이스 관리
 │   ├── theme.py                # 테마 시스템
 │   └── i18n.py                 # 다국어 지원 시스템
-└── ui/
+└── ui/                          # UI 레이어
     ├── __init__.py
     ├── main_window.py          # 메인 윈도우
+    ├── mini_window.py          # 미니 윈도우
     ├── timer_widget.py         # 타이머 디스플레이
     ├── task_widget.py          # 할 일 관리
     ├── stats_widget.py         # 통계 차트
@@ -155,7 +156,9 @@ Ppodo/
     ├── level_widget.py         # 레벨 & 경험치
     ├── badge_widget.py         # 뱃지 컬렉션
     ├── settings_dialog.py      # 설정 다이얼로그
-    └── mini_window.py          # 미니 윈도우
+    └── styles/                 # 스타일링 모듈
+        ├── __init__.py
+        └── theme_styles.py     # 테마 기반 스타일 유틸리티
 ```
 
 ---

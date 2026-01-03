@@ -24,14 +24,14 @@ class GrapeWidget(QWidget):
 
     def _init_ui(self):
         """Initialize UI components."""
-        self.setMinimumWidth(280)  # Ensure minimum width for visibility
+        self.setMinimumWidth(300)  # Ensure minimum width for visibility
         layout = QVBoxLayout()
         layout.setSpacing(15)
-        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setContentsMargins(15, 15, 15, 15)  # Consistent padding
 
-        # Title
+        # Title - more visible
         title = QLabel("🍇 포도 수확량")
-        title.setStyleSheet("font-size: 16px; font-weight: bold;")
+        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #2C3E50;")
         layout.addWidget(title)
 
         # Total stats group
@@ -41,13 +41,13 @@ class GrapeWidget(QWidget):
         total_layout.setSpacing(8)
 
         self.total_grapes_label = QLabel("🟣 포도알: 0개")
-        self.total_grapes_label.setStyleSheet("font-size: 14px;")
+        self.total_grapes_label.setStyleSheet("font-size: 15px; color: #2C3E50;")
 
         self.total_bunches_label = QLabel("🍇 포도송이: 0송이")
-        self.total_bunches_label.setStyleSheet("font-size: 14px;")
+        self.total_bunches_label.setStyleSheet("font-size: 15px; color: #2C3E50;")
 
         self.total_boxes_label = QLabel("📦 포도상자: 0상자")
-        self.total_boxes_label.setStyleSheet("font-size: 14px;")
+        self.total_boxes_label.setStyleSheet("font-size: 15px; color: #2C3E50;")
 
         total_layout.addWidget(self.total_grapes_label)
         total_layout.addWidget(self.total_bunches_label)
