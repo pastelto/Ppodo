@@ -30,6 +30,9 @@ class TimerWidget(QWidget):
 
     def _init_ui(self):
         """Initialize UI components."""
+        # Set minimum size for the widget to prevent timer clipping
+        self.setMinimumSize(280, 260)
+
         layout = QVBoxLayout()
         layout.setSpacing(20)
         layout.setContentsMargins(20, 20, 20, 20)
@@ -38,13 +41,14 @@ class TimerWidget(QWidget):
         initial_state = self.lang_manager.t('state_idle') if self.lang_manager else "⏸ 대기 중"
         self.state_label = QLabel(initial_state)
         self.state_label.setAlignment(Qt.AlignCenter)
+        self.state_label.setMinimumHeight(35)  # Ensure state label is fully visible
         layout.addWidget(self.state_label)
 
         # Timer display (MM:SS)
         self.time_label = QLabel("25:00")
         self.time_label.setAlignment(Qt.AlignCenter)
         self.time_label.setWordWrap(True)
-        self.time_label.setMinimumHeight(80)  # Ensure minimum height for visibility
+        self.time_label.setMinimumHeight(90)  # Increased from 80 to prevent clipping
         layout.addWidget(self.time_label, 1)  # Give it stretch
 
         # Progress bar
@@ -53,6 +57,7 @@ class TimerWidget(QWidget):
         self.progress_bar.setMaximum(100)
         self.progress_bar.setValue(0)
         self.progress_bar.setTextVisible(True)
+        self.progress_bar.setMinimumHeight(35)  # Ensure progress bar is fully visible
         progress_format = self.lang_manager.t('progress_format') if self.lang_manager else "%p% 진행"
         self.progress_bar.setFormat(progress_format)
         layout.addWidget(self.progress_bar)
@@ -61,6 +66,7 @@ class TimerWidget(QWidget):
         self.task_label = QLabel("")
         self.task_label.setAlignment(Qt.AlignCenter)
         self.task_label.setWordWrap(True)
+        self.task_label.setMinimumHeight(25)  # Ensure task label area is visible
         layout.addWidget(self.task_label)
 
         layout.addStretch()
