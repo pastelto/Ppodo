@@ -10,15 +10,17 @@ from core.database import Database
 class LevelWidget(QWidget):
     """Widget for displaying level, XP, and streak information."""
 
-    def __init__(self, db: Database):
+    def __init__(self, db: Database, theme_manager=None):
         """
         Initialize level widget.
 
         Args:
             db: Database instance
+            theme_manager: Theme manager for dynamic colors
         """
         super().__init__()
         self.db = db
+        self.theme_manager = theme_manager
         self._init_ui()
         self.refresh()
 
@@ -36,12 +38,6 @@ class LevelWidget(QWidget):
         level_layout = QHBoxLayout()
 
         self.level_label = QLabel("⭐ Level 1")
-        self.level_label.setStyleSheet("""
-            font-size: 18px;
-            font-weight: bold;
-            color: #E63946;
-            padding: 5px;
-        """)
         self.level_label.setMinimumHeight(30)
         level_layout.addWidget(self.level_label)
 
@@ -56,23 +52,6 @@ class LevelWidget(QWidget):
         self.xp_bar.setFormat("%v / %m XP")
         self.xp_bar.setTextVisible(True)
         self.xp_bar.setMinimumHeight(36)  # Ensure full visibility and avoid overlap
-        self.xp_bar.setStyleSheet("""
-            QProgressBar {
-                border: 2px solid #E63946;
-                border-radius: 8px;
-                text-align: center;
-                min-height: 30px;
-                font-size: 13px;
-                font-weight: bold;
-                background-color: #F5F5F5;
-                padding-bottom: 2px;
-            }
-            QProgressBar::chunk {
-                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                                                   stop:0 #E63946, stop:1 #FF6B6B);
-                border-radius: 6px;
-            }
-        """)
         layout.addWidget(self.xp_bar)
 
         # Small gap between XP bar and the stats labels to avoid visual overlap
@@ -107,6 +86,59 @@ class LevelWidget(QWidget):
         layout.addLayout(stats_layout)
 
         self.setLayout(layout)
+
+        # Apply initial theme
+        self._apply_theme_styles()
+
+    def _apply_theme_styles(self):
+        """Apply theme colors to level widget."""
+        # Get theme color
+        if self.theme_manager:
+            theme_color = self.theme_manager.get_focus_color()
+            theme_color_light = self._lighten_color(theme_color, 0.2)
+        else:
+            theme_color = "#E63946"
+            theme_color_light = "#FF6B6B"
+
+        # Apply to level label
+        self.level_label.setStyleSheet(f"""
+            font-size: 18px;
+            font-weight: bold;
+            color: {theme_color};
+            padding: 5px;
+        """)
+
+        # Apply to XP bar
+        self.xp_bar.setStyleSheet(f"""
+            QProgressBar {{
+                border: 2px solid {theme_color};
+                border-radius: 8px;
+                text-align: center;
+                min-height: 30px;
+                font-size: 13px;
+                font-weight: bold;
+                background-color: #F5F5F5;
+                padding-bottom: 2px;
+            }}
+            QProgressBar::chunk {{
+                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                                                   stop:0 {theme_color}, stop:1 {theme_color_light});
+                border-radius: 6px;
+            }}
+        """)
+
+    def _lighten_color(self, hex_color: str, factor: float = 0.3) -> str:
+        """Lighten a hex color."""
+        hex_color = hex_color.lstrip('#')
+        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+        r = min(255, int(r + (255 - r) * factor))
+        g = min(255, int(g + (255 - g) * factor))
+        b = min(255, int(b + (255 - b) * factor))
+        return f'#{r:02x}{g:02x}{b:02x}'
+
+    def apply_theme(self):
+        """Apply current theme to the widget."""
+        self._apply_theme_styles()
 
     def refresh(self):
         """Refresh level and XP display."""

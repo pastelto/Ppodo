@@ -18,6 +18,7 @@ from ui.level_widget import LevelWidget
 from ui.task_widget import TaskWidget
 from ui.stats_widget import StatsWidget
 from ui.badge_widget import BadgeWidget
+from ui.history_widget import HistoryWidget
 from ui.settings_dialog import SettingsDialog
 from ui.mini_window import MiniWindow
 
@@ -75,9 +76,8 @@ class MainWindow(QMainWindow):
         app_title = f"🍇 {self.lang_manager.t('app_name')}"
         if self.lang_manager.get_current_language() == 'ko':
             app_title = "🍇 Ppodo (뽀도)"
-        title = QLabel(app_title)
-        title.setStyleSheet("font-size: 20px; font-weight: bold; color: #E63946;")
-        header_layout.addWidget(title)
+        self.title_label = QLabel(app_title)
+        header_layout.addWidget(self.title_label)
 
         header_layout.addStretch()
 
@@ -164,7 +164,7 @@ class MainWindow(QMainWindow):
         main_layout.addLayout(header_layout)
 
         # Level widget (always visible)
-        self.level_widget = LevelWidget(self.db)
+        self.level_widget = LevelWidget(self.db, self.theme_manager)
         main_layout.addWidget(self.level_widget)
         # small spacer to keep level area visually separated from the main content
         main_layout.addSpacing(6)
@@ -193,6 +193,10 @@ class MainWindow(QMainWindow):
         # Task tab
         self.task_widget = TaskWidget(self.db, self.theme_manager)
         self.tabs.addTab(self.task_widget, self.lang_manager.t('tab_tasks'))
+
+        # History tab
+        self.history_widget = HistoryWidget(self.db)
+        self.tabs.addTab(self.history_widget, "📜 기록")
 
         # Stats tab
         self.stats_widget = StatsWidget(self.db)
@@ -249,6 +253,15 @@ class MainWindow(QMainWindow):
         is_focus = self.timer.is_focus()
         stylesheet = self.theme_manager.apply_stylesheet("main", is_focus)
         self.setStyleSheet(stylesheet)
+
+        # Apply theme color to app title
+        if hasattr(self, 'title_label'):
+            theme_color = self.theme_manager.get_focus_color()
+            self.title_label.setStyleSheet(f"font-size: 20px; font-weight: bold; color: {theme_color};")
+
+        # Apply to level widget
+        if hasattr(self, 'level_widget'):
+            self.level_widget.apply_theme()
 
         # Apply to timer widget
         if hasattr(self, 'timer_widget'):
@@ -599,6 +612,7 @@ class MainWindow(QMainWindow):
         self.level_widget.refresh()
         self.badge_widget.refresh()
         self.stats_widget.refresh()
+        self.history_widget.refresh()
 
         # Update button states (break starts automatically)
         self.start_button.setEnabled(False)
