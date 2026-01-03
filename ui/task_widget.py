@@ -147,9 +147,12 @@ class TaskWidget(QWidget):
         # Get theme colors
         if self.theme_manager:
             focus_color = self.theme_manager.get_focus_color()
+            # Use a darker version of theme color for selection (more muted)
+            selected_color = self._darken_color(focus_color, 0.25)
             hover_color = self._lighten_color(focus_color, 0.85)  # Very light version
         else:
             focus_color = "#E63946"
+            selected_color = "#B82E3A"  # Darker red
             hover_color = "#FFE5E8"
 
         # Use a slightly stronger divider color so separators are visible
@@ -170,7 +173,7 @@ class TaskWidget(QWidget):
                 border-bottom: none;
             }}
             QListWidget::item:selected {{
-                background-color: {focus_color};
+                background-color: {selected_color};
                 color: #FFFFFF;
             }}
             QListWidget::item:hover {{
@@ -187,6 +190,16 @@ class TaskWidget(QWidget):
         r = int(r + (255 - r) * factor)
         g = int(g + (255 - g) * factor)
         b = int(b + (255 - b) * factor)
+        return f'#{r:02x}{g:02x}{b:02x}'
+
+    def _darken_color(self, hex_color: str, factor: float = 0.2) -> str:
+        """Darken a hex color by reducing brightness."""
+        hex_color = hex_color.lstrip('#')
+        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+        # Reduce brightness
+        r = int(r * (1 - factor))
+        g = int(g * (1 - factor))
+        b = int(b * (1 - factor))
         return f'#{r:02x}{g:02x}{b:02x}'
 
     def refresh(self):
