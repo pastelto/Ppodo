@@ -1,8 +1,8 @@
 """
 Grape collection widget for Ppodo application.
-Displays grape → bunch → box progression.
+Displays grape → bunch → box → wine bottle → wine crate progression.
 """
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGroupBox
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, QGridLayout
 from PySide6.QtCore import Qt
 from core.database import Database
 
@@ -23,113 +23,132 @@ class GrapeWidget(QWidget):
         self.refresh()
 
     def _init_ui(self):
-        """Initialize UI components."""
-        self.setMinimumWidth(300)  # Ensure minimum width for visibility
+        """Initialize UI components with 2x2 grid layout."""
+        self.setMinimumWidth(320)
         layout = QVBoxLayout()
-        layout.setSpacing(15)
-        layout.setContentsMargins(15, 15, 15, 15)  # Consistent padding
+        layout.setSpacing(12)
+        layout.setContentsMargins(15, 15, 15, 15)
 
-        # Title - more visible
-        title = QLabel("🍇 포도 수확량")
-        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #2C3E50;")
+        # Title
+        title = QLabel("🍇 포도 수확 단계")
+        title.setStyleSheet("font-size: 18px; font-weight: bold; color: #8B5A8D;")  # Purple grape theme
+        title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
-
-        # Total stats group
-        total_group = QGroupBox("전체 수확량")
-        total_group.setStyleSheet("QGroupBox { font-size: 14px; font-weight: bold; padding-top: 10px; }")
-        total_layout = QVBoxLayout()
-        total_layout.setSpacing(8)
-
-        self.total_grapes_label = QLabel("🟣 포도알: 0개")
-        self.total_grapes_label.setStyleSheet("font-size: 15px; color: #2C3E50;")
-
-        self.total_bunches_label = QLabel("🍇 포도송이: 0송이")
-        self.total_bunches_label.setStyleSheet("font-size: 15px; color: #2C3E50;")
-
-        self.total_boxes_label = QLabel("📦 포도상자: 0상자")
-        self.total_boxes_label.setStyleSheet("font-size: 15px; color: #2C3E50;")
-
-        total_layout.addWidget(self.total_grapes_label)
-        total_layout.addWidget(self.total_bunches_label)
-        total_layout.addWidget(self.total_boxes_label)
-        total_group.setLayout(total_layout)
-        layout.addWidget(total_group)
 
         # Today stats
         self.today_label = QLabel("⭐ 오늘: 0개")
-        self.today_label.setStyleSheet("font-size: 14px; color: #E63946; font-weight: bold;")
+        self.today_label.setStyleSheet("font-size: 14px; color: #8B5A8D; font-weight: bold;")
+        self.today_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.today_label)
 
-        # Current bunch progress
-        bunch_group = QGroupBox("현재 송이 진행도")
-        bunch_group.setStyleSheet("QGroupBox { font-size: 14px; font-weight: bold; padding-top: 10px; }")
-        bunch_layout = QVBoxLayout()
-        bunch_layout.setSpacing(8)
+        # 2x2 Grid for progression stages
+        grid = QGridLayout()
+        grid.setSpacing(10)
 
-        self.bunch_progress_label = QLabel("[○○○○○○○○○○]")
-        self.bunch_progress_label.setStyleSheet("font-size: 18px; font-family: monospace;")
-        self.bunch_progress_label.setAlignment(Qt.AlignCenter)
+        # Stage 1: Grape Bunch (포도송이)
+        bunch_box = self._create_stage_box("🍇", "포도송이", "total_bunches", "current_bunch")
+        self.bunch_icon = bunch_box['icon']
+        self.bunch_total = bunch_box['total']
+        self.bunch_progress = bunch_box['progress']
+        grid.addWidget(bunch_box['widget'], 0, 0)
 
-        self.bunch_count_label = QLabel("0 / 10 포도알")
-        self.bunch_count_label.setStyleSheet("font-size: 12px; color: #666;")
-        self.bunch_count_label.setAlignment(Qt.AlignCenter)
+        # Stage 2: Grape Box (포도상자)
+        box_box = self._create_stage_box("📦", "포도상자", "total_boxes", "current_box")
+        self.box_icon = box_box['icon']
+        self.box_total = box_box['total']
+        self.box_progress = box_box['progress']
+        grid.addWidget(box_box['widget'], 0, 1)
 
-        bunch_layout.addWidget(self.bunch_progress_label)
-        bunch_layout.addWidget(self.bunch_count_label)
-        bunch_group.setLayout(bunch_layout)
-        layout.addWidget(bunch_group)
+        # Stage 3: Wine Bottle (와인병)
+        bottle_box = self._create_stage_box("🍷", "와인병", "total_bottles", "current_bottle")
+        self.bottle_icon = bottle_box['icon']
+        self.bottle_total = bottle_box['total']
+        self.bottle_progress = bottle_box['progress']
+        grid.addWidget(bottle_box['widget'], 1, 0)
 
-        # Current box progress
-        box_group = QGroupBox("현재 상자 진행도")
-        box_group.setStyleSheet("QGroupBox { font-size: 14px; font-weight: bold; padding-top: 10px; }")
-        box_layout = QVBoxLayout()
-        box_layout.setSpacing(8)
+        # Stage 4: Wine Crate (와인상자)
+        crate_box = self._create_stage_box("🍾", "와인상자", "total_crates", "current_crate")
+        self.crate_icon = crate_box['icon']
+        self.crate_total = crate_box['total']
+        self.crate_progress = crate_box['progress']
+        grid.addWidget(crate_box['widget'], 1, 1)
 
-        self.box_progress_label = QLabel("0 / 10 송이")
-        self.box_progress_label.setStyleSheet("font-size: 16px; font-weight: bold;")
-        self.box_progress_label.setAlignment(Qt.AlignCenter)
-
-        box_layout.addWidget(self.box_progress_label)
-        box_group.setLayout(box_layout)
-        layout.addWidget(box_group)
-
+        layout.addLayout(grid)
         layout.addStretch()
         self.setLayout(layout)
 
+    def _create_stage_box(self, icon: str, name: str, total_key: str, progress_key: str) -> dict:
+        """Create a stage box for the 2x2 grid."""
+        box = QGroupBox()
+        box.setStyleSheet("""
+            QGroupBox {
+                border: 2px solid #E0E0E0;
+                border-radius: 10px;
+                background-color: #FAFAFA;
+                padding: 10px;
+            }
+        """)
+
+        box_layout = QVBoxLayout()
+        box_layout.setSpacing(5)
+
+        # Icon (large)
+        icon_label = QLabel(icon)
+        icon_label.setStyleSheet("font-size: 36px;")
+        icon_label.setAlignment(Qt.AlignCenter)
+        box_layout.addWidget(icon_label)
+
+        # Name
+        name_label = QLabel(name)
+        name_label.setStyleSheet("font-size: 13px; font-weight: bold; color: #2C3E50;")
+        name_label.setAlignment(Qt.AlignCenter)
+        box_layout.addWidget(name_label)
+
+        # Total count
+        total_label = QLabel("0")
+        total_label.setStyleSheet("font-size: 20px; font-weight: bold; color: #8B5A8D;")
+        total_label.setAlignment(Qt.AlignCenter)
+        box_layout.addWidget(total_label)
+
+        # Progress (e.g., "3/10")
+        progress_label = QLabel("0/10")
+        progress_label.setStyleSheet("font-size: 11px; color: #666;")
+        progress_label.setAlignment(Qt.AlignCenter)
+        box_layout.addWidget(progress_label)
+
+        box.setLayout(box_layout)
+
+        return {
+            'widget': box,
+            'icon': icon_label,
+            'total': total_label,
+            'progress': progress_label
+        }
+
     def refresh(self):
-        """Refresh grape collection display."""
+        """Refresh grape collection display with wine progression."""
         profile = self.db.get_profile()
         today_stats = self.db.get_today_stats()
-
-        # Update total stats
-        self.total_grapes_label.setText(f"🟣 포도알: {profile['total_grapes']}개")
-        self.total_bunches_label.setText(f"🍇 포도송이: {profile['total_bunches']}송이")
-        self.total_boxes_label.setText(f"📦 포도상자: {profile['total_boxes']}상자")
 
         # Update today stats
         self.today_label.setText(f"⭐ 오늘: {today_stats['grapes_earned']}개")
 
-        # Update current bunch progress (visual)
-        current_bunch_grapes = profile['current_bunch_grapes']
-        bunch_visual = self._create_progress_visual(current_bunch_grapes, 10)
-        self.bunch_progress_label.setText(bunch_visual)
-        self.bunch_count_label.setText(f"{current_bunch_grapes} / 10 포도알")
+        # Update Stage 1: 포도송이 (Bunches)
+        self.bunch_total.setText(str(profile['total_bunches']))
+        self.bunch_progress.setText(f"{profile['current_bunch_grapes']}/10")
 
-        # Update current box progress
-        current_box_bunches = profile['current_box_bunches']
-        self.box_progress_label.setText(f"{current_box_bunches} / 10 송이")
+        # Update Stage 2: 포도상자 (Boxes)
+        self.box_total.setText(str(profile['total_boxes']))
+        self.box_progress.setText(f"{profile['current_box_bunches']}/10")
 
-    def _create_progress_visual(self, current: int, total: int) -> str:
-        """
-        Create visual progress indicator.
+        # Update Stage 3: 와인병 (Wine Bottles)
+        bottles = profile.get('total_wine_bottles', 0)
+        bottle_progress = profile.get('current_bottle_boxes', 0)
+        self.bottle_total.setText(str(bottles))
+        self.bottle_progress.setText(f"{bottle_progress}/10")
 
-        Args:
-            current: Current progress
-            total: Total needed
-
-        Returns:
-            Visual progress string (e.g., "[●●●○○○○○○○]")
-        """
-        filled = "●" * current
-        empty = "○" * (total - current)
-        return f"[{filled}{empty}]"
+        # Update Stage 4: 와인상자 (Wine Crates)
+        crates = profile.get('total_wine_crates', 0)
+        crate_progress = profile.get('current_crate_bottles', 0)
+        self.crate_total.setText(str(crates))
+        self.crate_progress.setText(f"{crate_progress}/10")
