@@ -127,10 +127,7 @@ class LanguageManager:
             'msg_no_grape_short': '⚠️ 15분 미만 집중이라 포도알을 획득하지 못했습니다.\n다음부터는 15분 이상 집중하여 포도알을 모아보세요!',
             'msg_no_grape_detail': '현재 집중 시간이 {duration}분으로 설정되어 있습니다.\n\n🍇 포도알은 15분 이상 집중했을 때만 모을 수 있습니다.\n\n15분 미만으로 진행하면 포도알을 획득할 수 없습니다.\n그래도 진행하시겠습니까?',
             'msg_break_complete': '☕ 휴식 완료',
-            'msg_break_done': '휴식이 끝났습니다.\n다시 집중할 준비가 되셨나요?',
-
-            # Progress bar
-            'progress_format': '%p% 진행',
+            'msg_break_done': '휴식이 끝났습니다.\n다시 집중할 준비가 되셨나요?'
         },
 
         'en': {
@@ -244,10 +241,7 @@ class LanguageManager:
             'msg_no_grape_short': '⚠️ No grape earned for focusing less than 15 minutes.\nNext time, focus for at least 15 minutes to collect grapes!',
             'msg_no_grape_detail': 'Current focus time is set to {duration} minutes.\n\n🍇 Grapes can only be collected for 15+ minute sessions.\n\n You won\'t earn grapes for sessions under 15 minutes.\nContinue anyway?',
             'msg_break_complete': '☕ Break Complete',
-            'msg_break_done': 'Break is over.\nReady to focus again?',
-
-            # Progress bar
-            'progress_format': '%p% Progress',
+            'msg_break_done': 'Break is over.\nReady to focus again?'
         },
 
         'ja': {
@@ -361,10 +355,7 @@ class LanguageManager:
             'msg_no_grape_short': '⚠️ 15分未満の集中のためぶどう粒を獲得できませんでした。\n次回は15分以上集中してぶどう粒を集めましょう！',
             'msg_no_grape_detail': '現在の集中時間は{duration}分に設定されています。\n\n🍇 ぶどう粒は15分以上集中した場合のみ獲得できます。\n\n15分未満では ぶどう粒を獲得できません。\nそれでも続行しますか？',
             'msg_break_complete': '☕ 休憩完了',
-            'msg_break_done': '休憩が終わりました。\nまた集中する準備はできましたか？',
-
-            # Progress bar
-            'progress_format': '%p% 進行中',
+            'msg_break_done': '休憩が終わりました。\nまた集中する準備はできましたか？'
         }
     }
 

@@ -166,6 +166,8 @@ class MainWindow(QMainWindow):
         # Level widget (always visible)
         self.level_widget = LevelWidget(self.db)
         main_layout.addWidget(self.level_widget)
+        # small spacer to keep level area visually separated from the main content
+        main_layout.addSpacing(6)
 
         # Main content splitter (timer + grape on left, tabs on right)
         self.content_splitter = QSplitter(Qt.Horizontal)

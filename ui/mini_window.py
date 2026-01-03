@@ -46,13 +46,13 @@ class MiniWindow(QWidget):
 
     def _init_ui(self):
         """Initialize UI components."""
-        # Increased size for better visibility
+        # Compact size for mini window; tuned paddings to avoid clipping
         self.setFixedSize(350, 240)
 
         layout = QVBoxLayout()
-        # Consistent padding throughout
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)  # Increased spacing for better separation
+        # Reduced padding and spacing to ensure time label fits
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(10)
 
         # Header with restore button
         header_layout = QHBoxLayout()
@@ -123,24 +123,24 @@ class MiniWindow(QWidget):
             font-size: 13px;
             font-weight: bold;
             color: #666;
-            padding: 5px;
+            padding: 3px;
         """)
         layout.addWidget(self.state_label)
 
         # Timer display - larger and more visible
         self.time_label = QLabel("25:00")
         self.time_label.setAlignment(Qt.AlignCenter)
-        self.time_label.setMinimumHeight(70)  # Ensure full visibility
-        font = QFont('Consolas', 44)
+        self.time_label.setMinimumHeight(60)  # Ensure full visibility without overlapping
+        font = QFont('Consolas', 40)
         font.setBold(True)
         self.time_label.setFont(font)
-        # Consistent padding
-        self.time_label.setStyleSheet("color: #2B2D42; padding: 15px;")
+        # Reduced padding so large digits don't overflow into controls
+        self.time_label.setStyleSheet("color: #2B2D42; padding: 8px;")
         layout.addWidget(self.time_label, 1)  # Give it stretch priority
 
         # Control buttons with consistent spacing
         button_layout = QHBoxLayout()
-        button_layout.setSpacing(15)  # Consistent spacing between buttons
+        button_layout.setSpacing(10)  # Reduced spacing between buttons
 
         self.start_pause_button = QPushButton("▶")
         self.start_pause_button.setFixedSize(55, 45)  # Slightly larger buttons
@@ -157,7 +157,7 @@ class MiniWindow(QWidget):
                 background-color: {focus_hover};
             }}
         """)
-
+        # Make stop button a white square with colored border and icon only
         self.stop_button = QPushButton("⏹")
         self.stop_button.setFixedSize(55, 45)  # Matching button size
         self.stop_button.setEnabled(False)

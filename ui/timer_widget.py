@@ -2,7 +2,7 @@
 Timer display widget for Ppodo application.
 Shows countdown timer with progress bar and state indicator.
 """
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QProgressBar
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from core.timer import PomodoroTimer
@@ -50,17 +50,6 @@ class TimerWidget(QWidget):
         self.time_label.setWordWrap(True)
         self.time_label.setMinimumHeight(90)  # Increased from 80 to prevent clipping
         layout.addWidget(self.time_label, 1)  # Give it stretch
-
-        # Progress bar
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setMinimum(0)
-        self.progress_bar.setMaximum(100)
-        self.progress_bar.setValue(0)
-        self.progress_bar.setTextVisible(True)
-        self.progress_bar.setMinimumHeight(35)  # Ensure progress bar is fully visible
-        progress_format = self.lang_manager.t('progress_format') if self.lang_manager else "%p% 진행"
-        self.progress_bar.setFormat(progress_format)
-        layout.addWidget(self.progress_bar)
 
         # Current task label
         self.task_label = QLabel("")
@@ -119,45 +108,9 @@ class TimerWidget(QWidget):
             padding: 5px;
         """)
 
-        # Update progress bar color
-        self._update_progress_bar_style()
+        # Progress bar removed; no style update required
 
-    def _update_progress_bar_style(self):
-        """Update progress bar style based on current state."""
-        if self.theme_manager:
-            is_focus = self.timer.is_focus()
-            theme_color = self.theme_manager.get_current_color(is_focus)
-        else:
-            theme_color = "#E63946"
-
-        state = self.timer.state.value if hasattr(self.timer, 'state') else "idle"
-
-        if state == "focus":
-            border_color = theme_color
-            chunk_color = f"qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 {theme_color}, stop:1 {self._lighten_color(theme_color)})"
-        elif state == "break":
-            break_color = self.theme_manager.get_break_color() if self.theme_manager else "#A8DADC"
-            border_color = break_color
-            chunk_color = f"qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 {break_color}, stop:1 {self._lighten_color(break_color)})"
-        else:
-            border_color = "#999999"
-            chunk_color = "#CCCCCC"
-
-        self.progress_bar.setStyleSheet(f"""
-            QProgressBar {{
-                border: 3px solid {border_color};
-                border-radius: 10px;
-                text-align: center;
-                height: 30px;
-                font-size: 13px;
-                font-weight: bold;
-                background-color: #F5F5F5;
-            }}
-            QProgressBar::chunk {{
-                background-color: {chunk_color};
-                border-radius: 7px;
-            }}
-        """)
+    # Progress bar removed; no style method required
 
     def _lighten_color(self, hex_color: str, factor: float = 0.3) -> str:
         """Lighten a hex color."""
@@ -203,9 +156,7 @@ class TimerWidget(QWidget):
         minutes, seconds = self.timer.get_remaining_time()
         self.time_label.setText(f"{minutes:02d}:{seconds:02d}")
 
-        # Update progress bar
-        progress = self.timer.get_progress_percent()
-        self.progress_bar.setValue(int(progress))
+        # Progress bar removed; no update required
 
     def update_state(self, state: str):
         """
@@ -255,8 +206,7 @@ class TimerWidget(QWidget):
             padding: 10px;
         """)
 
-        # Update progress bar style with theme colors
-        self._update_progress_bar_style()
+        # Progress bar removed; no styling required
 
     def apply_theme(self):
         """Apply current theme to the widget."""

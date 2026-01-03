@@ -155,6 +155,8 @@ class TaskWidget(QWidget):
             selected_color = "#B82E3A"  # Darker red
             hover_color = "#FFE5E8"
 
+        # Use a slightly stronger divider color so separators are visible
+        divider = "#E8E8E8"
         self.task_list.setStyleSheet(f"""
             QListWidget {{
                 border: 1px solid #E0E0E0;
@@ -163,9 +165,12 @@ class TaskWidget(QWidget):
                 font-size: 13px;
             }}
             QListWidget::item {{
-                padding: 12px;
-                border-bottom: 1px solid #F0F0F0;
+                padding: 12px 10px;
+                border-bottom: 1px solid {divider};
                 color: #2C3E50;
+            }}
+            QListWidget::item:last {{
+                border-bottom: none;
             }}
             QListWidget::item:selected {{
                 background-color: {selected_color};
