@@ -48,6 +48,18 @@ class TaskWidget(QWidget):
         self.task_input = QLineEdit()
         self.task_input.setPlaceholderText("새 할 일을 입력하세요...")
         self.task_input.returnPressed.connect(self.add_task)
+        # Remove focus from input when clicking list items
+        self.task_input.setStyleSheet("""
+            QLineEdit {
+                padding: 8px;
+                border: 1px solid #E0E0E0;
+                border-radius: 5px;
+                font-size: 13px;
+            }
+            QLineEdit:focus {
+                border: 2px solid #95A5A6;
+            }
+        """)
 
         self.add_button = QPushButton("추가")
         self.add_button.clicked.connect(self.add_task)
@@ -60,6 +72,8 @@ class TaskWidget(QWidget):
         # Task list
         self.task_list = QListWidget()
         self.task_list.itemClicked.connect(self._on_task_clicked)
+        # Prevent focus on click
+        self.task_list.setFocusPolicy(Qt.NoFocus)
         self._apply_task_list_style()
         layout.addWidget(self.task_list)
 
@@ -84,6 +98,9 @@ class TaskWidget(QWidget):
         layout.addWidget(self.stats_label)
 
         self.setLayout(layout)
+
+        # Apply initial button styles
+        self._update_button_styles()
 
     def add_task(self):
         """Add a new task."""
@@ -115,6 +132,7 @@ class TaskWidget(QWidget):
         self.selected_task_id = None
         self.complete_button.setEnabled(False)
         self.delete_button.setEnabled(False)
+        self._update_button_styles()
 
     def delete_task(self):
         """Delete selected task."""
@@ -141,6 +159,7 @@ class TaskWidget(QWidget):
             self.selected_task_id = None
             self.complete_button.setEnabled(False)
             self.delete_button.setEnabled(False)
+            self._update_button_styles()
 
     def _apply_task_list_style(self):
         """Apply theme-aware styling to task list."""
@@ -202,6 +221,63 @@ class TaskWidget(QWidget):
         b = int(b * (1 - factor))
         return f'#{r:02x}{g:02x}{b:02x}'
 
+    def _update_button_styles(self):
+        """Update button styles based on theme and enabled state."""
+        # Get theme colors
+        if self.theme_manager:
+            focus_color = self.theme_manager.get_focus_color()
+            break_color = self.theme_manager.get_break_color()
+        else:
+            focus_color = "#27AE60"  # Green for complete
+            break_color = "#E74C3C"  # Red for delete
+
+        # Complete button - use focus color when enabled
+        complete_hover = self._darken_color(focus_color, 0.15)
+        self.complete_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {focus_color};
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px 20px;
+                font-size: 14px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {complete_hover};
+            }}
+            QPushButton:disabled {{
+                background-color: #E0E0E0;
+                color: #999999;
+            }}
+        """)
+
+        # Delete button - use break color when enabled
+        delete_hover = self._darken_color(break_color, 0.15)
+        self.delete_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {break_color};
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px 20px;
+                font-size: 14px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {delete_hover};
+            }}
+            QPushButton:disabled {{
+                background-color: #E0E0E0;
+                color: #999999;
+            }}
+        """)
+
+    def apply_theme(self):
+        """Apply current theme to the widget."""
+        self._apply_task_list_style()
+        self._update_button_styles()
+
     def refresh(self):
         """Refresh task list showing both incomplete and completed tasks."""
         # Clear list
@@ -250,6 +326,12 @@ class TaskWidget(QWidget):
         # Enable buttons
         self.complete_button.setEnabled(True)
         self.delete_button.setEnabled(True)
+
+        # Update button styles to show they're enabled
+        self._update_button_styles()
+
+        # Clear focus from input box
+        self.task_input.clearFocus()
 
         # Emit signal
         self.task_selected.emit(self.selected_task_id, task_title)
