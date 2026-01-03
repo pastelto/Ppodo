@@ -22,9 +22,9 @@ class ThemeManager:
     THEMES = {
         "Classic": Theme(
             name="Classic",
-            focus_color="#E63946",
+            focus_color="#3498DB",  # Sky blue instead of red
             break_color="#A8DADC",
-            concept="전통적인 뽀모도로의 열정과 휴식"
+            concept="하늘빛 집중과 휴식의 조화"
         ),
         "Midnight": Theme(
             name="Midnight",
