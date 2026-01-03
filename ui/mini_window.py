@@ -14,20 +14,23 @@ from core.timer import PomodoroTimer
 class MiniWindow(QWidget):
     """Mini clock-only window."""
 
-    # Signal to request return to main window
+    # Signals
     restore_requested = Signal()
+    stop_requested = Signal()  # Signal to request stop (handled by main window)
 
-    def __init__(self, timer: PomodoroTimer, theme_manager=None):
+    def __init__(self, timer: PomodoroTimer, theme_manager=None, lang_manager=None):
         """
         Initialize mini window.
 
         Args:
             timer: PomodoroTimer instance
             theme_manager: ThemeManager instance
+            lang_manager: LanguageManager instance
         """
         super().__init__()
         self.timer = timer
         self.theme_manager = theme_manager
+        self.lang_manager = lang_manager
 
         # Window flags for always on top and frameless
         self.setWindowFlags(
@@ -147,6 +150,17 @@ class MiniWindow(QWidget):
         self.time_label.setStyleSheet("color: #2B2D42; padding: 8px;")
         layout.addWidget(self.time_label, 1)  # Give it stretch priority
 
+        # Task label - shows current task
+        self.task_label = QLabel("")
+        self.task_label.setAlignment(Qt.AlignCenter)
+        self.task_label.setWordWrap(True)
+        self.task_label.setStyleSheet("""
+            font-size: 11px;
+            color: #666;
+            padding: 3px;
+        """)
+        layout.addWidget(self.task_label)
+
         # Control buttons with consistent spacing
         button_layout = QHBoxLayout()
         button_layout.setSpacing(10)  # Reduced spacing between buttons
@@ -243,9 +257,24 @@ class MiniWindow(QWidget):
 
     def _on_stop(self):
         """Handle stop button click."""
-        self.timer.stop()
-        self.start_pause_button.setText("▶")
-        self.stop_button.setEnabled(False)
+        # Emit signal to main window to handle stop with confirmation
+        self.stop_requested.emit()
+
+    def set_current_task(self, task_title: str):
+        """
+        Set current task being worked on.
+
+        Args:
+            task_title: Task title to display
+        """
+        if task_title:
+            if self.lang_manager:
+                text = self.lang_manager.t('task_current', title=task_title)
+            else:
+                text = f"📝 {task_title}"
+            self.task_label.setText(text)
+        else:
+            self.task_label.setText("")
 
     def update_display(self):
         """Update timer display."""

@@ -457,8 +457,12 @@ class MainWindow(QMainWindow):
         """Show mini clock mode window."""
         # Create mini window if not exists
         if self.mini_window is None:
-            self.mini_window = MiniWindow(self.timer, self.theme_manager)
+            self.mini_window = MiniWindow(self.timer, self.theme_manager, self.lang_manager)
             self.mini_window.restore_requested.connect(self._restore_from_mini)
+            self.mini_window.stop_requested.connect(self._on_stop)
+            # Set current task if one is selected
+            if self.current_task_title:
+                self.mini_window.set_current_task(self.current_task_title)
 
         # Show mini window
         self.mini_window.show()
@@ -528,6 +532,9 @@ class MainWindow(QMainWindow):
             # Update timer widget with current task
             if self.current_task_title:
                 self.timer_widget.set_current_task(self.current_task_title)
+                # Also update mini window if it exists
+                if self.mini_window:
+                    self.mini_window.set_current_task(self.current_task_title)
 
     def _on_pause(self):
         """Handle pause button click."""
@@ -538,17 +545,24 @@ class MainWindow(QMainWindow):
     def _on_stop(self):
         """Handle stop button click."""
         # Confirm stop
-        if self.timer.is_running():
+        if self.timer.is_running() or self.timer.is_paused():
             reply = QMessageBox.question(
                 self,
-                "중지 확인",
-                "진행 중인 세션을 중지하시겠습니까?\n(진행 중인 포도알은 획득하지 못합니다)",
+                self.lang_manager.t('msg_stop_confirm_title'),
+                self.lang_manager.t('msg_stop_confirm_message'),
                 QMessageBox.Yes | QMessageBox.No,
                 QMessageBox.No
             )
 
             if reply == QMessageBox.No:
                 return
+
+            # Save partial focus time to statistics (without grape)
+            if self.current_session_id and self.timer.is_focus():
+                # Get elapsed time in seconds
+                elapsed_seconds = self.timer.total_seconds - self.timer.remaining_seconds
+                # Complete session without collecting grape
+                self.db.complete_session(self.current_session_id, collect_grape=False)
 
         self.timer.stop()
         self.current_session_id = None
@@ -560,6 +574,9 @@ class MainWindow(QMainWindow):
         self.pause_button.setEnabled(False)
         self.stop_button.setEnabled(False)
         self.timer_widget.set_current_task("")
+        # Also clear mini window task if it exists
+        if self.mini_window:
+            self.mini_window.set_current_task("")
 
     def _on_focus_completed(self):
         """Handle focus session completion."""
@@ -621,6 +638,9 @@ class MainWindow(QMainWindow):
 
         # Clear current task
         self.timer_widget.set_current_task("")
+        # Also clear mini window task if it exists
+        if self.mini_window:
+            self.mini_window.set_current_task("")
 
     def _on_break_completed(self):
         """Handle break completion."""
@@ -647,6 +667,9 @@ class MainWindow(QMainWindow):
         # If timer is running, update the display
         if self.timer.is_running():
             self.timer_widget.set_current_task(task_title)
+            # Also update mini window if it exists
+            if self.mini_window:
+                self.mini_window.set_current_task(task_title)
 
     def closeEvent(self, event):
         """Handle window close event."""

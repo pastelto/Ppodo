@@ -12,6 +12,8 @@ class Theme:
     name: str
     focus_color: str
     break_color: str
+    pause_color: str
+    pause_hover: str
     concept: str
 
 
@@ -20,41 +22,60 @@ class ThemeManager:
 
     # Premium theme palette (5 themes)
     THEMES = {
-        "Classic": Theme(
-            name="Classic",
-            focus_color="#3498DB",  # Sky blue instead of red
-            break_color="#A8DADC",
-            concept="하늘빛 집중과 휴식의 조화"
+        # 1. Nordic (기존 Classic 대체): 차분하고 지적인 북유럽 스타일의 블루톤
+        "Nordic": Theme(
+            name="Nordic",
+            focus_color="#457B9D",  # Steel Blue (차분한 집중)
+            break_color="#A8DADC",  # Pale Blue (시원한 휴식)
+            pause_color="#E9C46A",  # Sand Yellow (따뜻한 주의 환기)
+            pause_hover="#D4A373",  # Muted Bronze
+            concept="북유럽의 차분함과 지적인 분위기"
         ),
+
+        # 2. Midnight: 깊은 밤의 몰입감 (다크 모드 선호 시 최적)
         "Midnight": Theme(
             name="Midnight",
-            focus_color="#1B263B",
-            break_color="#E0E1DD",
-            concept="깊은 밤의 고요함과 차분함"
+            focus_color="#2B2D42",  # Dark Slate (깊은 몰입)
+            break_color="#8D99AE",  # Cool Grey (눈이 편한 회색)
+            pause_color="#FFD166",  # Sunglow (어두운 배경 위 확실한 강조)
+            pause_hover="#FFC035",  # Deep Yellow
+            concept="깊은 밤의 고요함과 완벽한 몰입"
         ),
+
+        # 3. Forest: 자연의 편안함 (가장 눈이 편한 조합)
         "Forest": Theme(
             name="Forest",
-            focus_color="#2D6A4F",
-            break_color="#D8E2DC",
-            concept="숲속의 안정감과 눈의 편안함"
+            focus_color="#2D6A4F",  # Deep Green (숲의 깊이)
+            break_color="#D8E2DC",  # Mist Green (안개 낀 숲)
+            pause_color="#D4A373",  # Wood Brown (나무 색상으로 자연스러운 조화)
+            pause_hover="#BC6C25",  # Caramel
+            concept="숲속의 피톤치드와 같은 안정감"
         ),
-        "Royal": Theme(
-            name="Royal",
-            focus_color="#5A189A",
-            break_color="#FFB703",
-            concept="창의성을 자극하는 보라와 황금빛"
+
+        # 4. Lavender (기존 Royal 대체): 창의적이고 몽환적인 보라빛
+        "Lavender": Theme(
+            name="Lavender",
+            focus_color="#7209B7",  # Vivid Violet (창의성 자극)
+            break_color="#E0AAFF",  # Soft Lilac (부드러운 이완)
+            pause_color="#4CC9F0",  # Vivid Sky Blue (보라색과 보색에 가까운 팝한 느낌)
+            pause_hover="#4895EF",  # Dodger Blue
+            concept="영감을 깨우는 감각적인 바이올렛"
         ),
-        "Sunset": Theme(
-            name="Sunset",
-            focus_color="#FB5607",
-            break_color="#3A86FF",
-            concept="활기찬 에너지와 역동적인 변화"
+
+        # 5. Cafe (기존 Sunset 대체): 따뜻하고 아늑한 커피 색상
+        "Cafe": Theme(
+            name="Cafe",
+            focus_color="#6F4E37",  # Coffee Bean (따뜻한 브라운)
+            break_color="#F5E0B7",  # Latte Foam (부드러운 베이지)
+            pause_color="#E67E22",  # Carrot Orange (커피와 어울리는 따뜻한 포인트)
+            pause_hover="#D35400",  # Pumpkin
+            concept="카페에서의 여유롭고 따뜻한 집중"
         )
     }
 
     def __init__(self):
-        """Initialize theme manager with Classic theme."""
-        self.current_theme_name = "Classic"
+        """Initialize theme manager with Nordic theme."""
+        self.current_theme_name = "Nordic"
 
     def get_theme(self, name: str = None) -> Theme:
         """
@@ -69,7 +90,7 @@ class ThemeManager:
         if name is None:
             name = self.current_theme_name
 
-        return self.THEMES.get(name, self.THEMES["Classic"])
+        return self.THEMES.get(name, self.THEMES["Nordic"])
 
     def set_theme(self, name: str):
         """
@@ -124,6 +145,32 @@ class ThemeManager:
         """
         theme = self.get_theme(theme_name)
         return theme.break_color
+
+    def get_pause_color(self, theme_name: str = None) -> str:
+        """
+        Get pause color for a theme.
+
+        Args:
+            theme_name: Theme name. If None, uses current theme.
+
+        Returns:
+            Hex color string
+        """
+        theme = self.get_theme(theme_name)
+        return theme.pause_color
+
+    def get_pause_hover_color(self, theme_name: str = None) -> str:
+        """
+        Get pause hover color for a theme.
+
+        Args:
+            theme_name: Theme name. If None, uses current theme.
+
+        Returns:
+            Hex color string
+        """
+        theme = self.get_theme(theme_name)
+        return theme.pause_hover
 
     def get_current_color(self, is_focus: bool) -> str:
         """

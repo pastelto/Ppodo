@@ -102,11 +102,11 @@ Wine Crate
 - Daily/total statistics display
 
 ### 🎨 Premium Themes (5 types)
-- **Classic**: Sky blue focus and tranquil rest
-- **Midnight**: Deep night's silence and calmness
-- **Forest**: Stability and eye comfort of the forest
-- **Royal**: Creative purple and golden light
-- **Sunset**: Energetic and dynamic change
+- **Nordic**: Nordic calmness and intellectual atmosphere (Steel Blue)
+- **Midnight**: Deep night's silence and perfect immersion (Dark Slate)
+- **Forest**: Forest's phytoncide-like stability (Deep Green)
+- **Lavender**: Inspiring and sensual violet (Vivid Violet)
+- **Cafe**: Relaxed and warm focus at the cafe (Coffee Bean Brown)
 
 ---
 
