@@ -24,12 +24,13 @@ class LevelWidget(QWidget):
 
     def _init_ui(self):
         """Initialize UI components."""
-        # Ensure minimum height for full visibility
-        self.setMinimumHeight(100)
+        # Ensure minimum height for full visibility (increase to avoid overlap)
+        self.setMinimumHeight(140)
 
         layout = QVBoxLayout()
-        layout.setSpacing(12)
-        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(14)
+        # give extra bottom margin so stats below the XP bar don't collide
+        layout.setContentsMargins(10, 10, 10, 18)
 
         # Level and XP section
         level_layout = QHBoxLayout()
@@ -54,7 +55,7 @@ class LevelWidget(QWidget):
         self.xp_bar.setValue(0)
         self.xp_bar.setFormat("%v / %m XP")
         self.xp_bar.setTextVisible(True)
-        self.xp_bar.setMinimumHeight(30)  # Ensure full visibility
+        self.xp_bar.setMinimumHeight(36)  # Ensure full visibility and avoid overlap
         self.xp_bar.setStyleSheet("""
             QProgressBar {
                 border: 2px solid #E63946;
@@ -64,6 +65,7 @@ class LevelWidget(QWidget):
                 font-size: 13px;
                 font-weight: bold;
                 background-color: #F5F5F5;
+                padding-bottom: 2px;
             }
             QProgressBar::chunk {
                 background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0,
@@ -73,9 +75,12 @@ class LevelWidget(QWidget):
         """)
         layout.addWidget(self.xp_bar)
 
+        # Small gap between XP bar and the stats labels to avoid visual overlap
+        layout.addSpacing(8)
+
         # Stats section with better spacing
         stats_layout = QHBoxLayout()
-        stats_layout.setSpacing(20)
+        stats_layout.setSpacing(22)
 
         # Streak
         self.streak_label = QLabel("🔥 연속: 0일")
@@ -83,7 +88,7 @@ class LevelWidget(QWidget):
             font-size: 14px;
             font-weight: bold;
             color: #2C3E50;
-            padding: 3px;
+            padding: 6px 3px 3px 3px;
         """)
 
         # Total time
@@ -92,7 +97,7 @@ class LevelWidget(QWidget):
             font-size: 14px;
             font-weight: bold;
             color: #2C3E50;
-            padding: 3px;
+            padding: 6px 3px 3px 3px;
         """)
 
         stats_layout.addWidget(self.streak_label)
