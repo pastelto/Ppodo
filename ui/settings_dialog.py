@@ -59,56 +59,64 @@ class SettingsDialog(QDialog):
         self.focus_spinbox.setValue(self.focus_minutes)
         suffix = self.lang_manager.t('settings_minutes') if self.lang_manager else " 분"
         self.focus_spinbox.setSuffix(suffix)
-        self.focus_spinbox.setStyleSheet("""
-            QSpinBox {
-                padding: 8px 30px 8px 8px;
+
+        # Get theme color for focus
+        focus_color = self.theme_manager.get_focus_color() if self.theme_manager else "#E63946"
+
+        self.focus_spinbox.setStyleSheet(f"""
+            QSpinBox {{
+                padding: 8px 35px 8px 8px;
                 font-size: 14px;
                 border: 2px solid #E0E0E0;
                 border-radius: 5px;
-            }
-            QSpinBox:focus {
-                border: 2px solid #E63946;
-            }
-            QSpinBox::up-button {
+            }}
+            QSpinBox:focus {{
+                border: 2px solid {focus_color};
+            }}
+            QSpinBox::up-button {{
                 subcontrol-origin: border;
                 subcontrol-position: top right;
-                width: 20px;
-                border-left: 1px solid #E0E0E0;
+                width: 26px;
+                height: 20px;
+                border-left: 2px solid #E0E0E0;
                 border-bottom: 1px solid #E0E0E0;
                 border-top-right-radius: 3px;
-                background: #F5F5F5;
-            }
-            QSpinBox::up-button:hover {
-                background: #E8E8E8;
-            }
-            QSpinBox::up-arrow {
+                background: #FAFAFA;
+            }}
+            QSpinBox::up-button:hover {{
+                background: #E8F4F8;
+            }}
+            QSpinBox::up-arrow {{
                 image: none;
                 width: 0;
                 height: 0;
-                border-left: 4px solid transparent;
-                border-right: 4px solid transparent;
-                border-bottom: 6px solid #555;
-            }
-            QSpinBox::down-button {
+                border-left: 6px solid transparent;
+                border-right: 6px solid transparent;
+                border-bottom: 8px solid #2C3E50;
+                margin-bottom: 2px;
+            }}
+            QSpinBox::down-button {{
                 subcontrol-origin: border;
                 subcontrol-position: bottom right;
-                width: 20px;
-                border-left: 1px solid #E0E0E0;
+                width: 26px;
+                height: 20px;
+                border-left: 2px solid #E0E0E0;
                 border-top: 1px solid #E0E0E0;
                 border-bottom-right-radius: 3px;
-                background: #F5F5F5;
-            }
-            QSpinBox::down-button:hover {
-                background: #E8E8E8;
-            }
-            QSpinBox::down-arrow {
+                background: #FAFAFA;
+            }}
+            QSpinBox::down-button:hover {{
+                background: #E8F4F8;
+            }}
+            QSpinBox::down-arrow {{
                 image: none;
                 width: 0;
                 height: 0;
-                border-left: 4px solid transparent;
-                border-right: 4px solid transparent;
-                border-top: 6px solid #555;
-            }
+                border-left: 6px solid transparent;
+                border-right: 6px solid transparent;
+                border-top: 8px solid #2C3E50;
+                margin-top: 2px;
+            }}
         """)
 
         focus_text = self.lang_manager.t('settings_focus_time') if self.lang_manager else "집중 시간:"
@@ -122,56 +130,64 @@ class SettingsDialog(QDialog):
         self.break_spinbox.setMaximum(60)
         self.break_spinbox.setValue(self.break_minutes)
         self.break_spinbox.setSuffix(suffix)
-        self.break_spinbox.setStyleSheet("""
-            QSpinBox {
-                padding: 8px 30px 8px 8px;
+
+        # Get theme color for break
+        break_color = self.theme_manager.get_break_color() if self.theme_manager else "#E63946"
+
+        self.break_spinbox.setStyleSheet(f"""
+            QSpinBox {{
+                padding: 8px 35px 8px 8px;
                 font-size: 14px;
                 border: 2px solid #E0E0E0;
                 border-radius: 5px;
-            }
-            QSpinBox:focus {
-                border: 2px solid #E63946;
-            }
-            QSpinBox::up-button {
+            }}
+            QSpinBox:focus {{
+                border: 2px solid {break_color};
+            }}
+            QSpinBox::up-button {{
                 subcontrol-origin: border;
                 subcontrol-position: top right;
-                width: 20px;
-                border-left: 1px solid #E0E0E0;
+                width: 26px;
+                height: 20px;
+                border-left: 2px solid #E0E0E0;
                 border-bottom: 1px solid #E0E0E0;
                 border-top-right-radius: 3px;
-                background: #F5F5F5;
-            }
-            QSpinBox::up-button:hover {
-                background: #E8E8E8;
-            }
-            QSpinBox::up-arrow {
+                background: #FAFAFA;
+            }}
+            QSpinBox::up-button:hover {{
+                background: #E8F4F8;
+            }}
+            QSpinBox::up-arrow {{
                 image: none;
                 width: 0;
                 height: 0;
-                border-left: 4px solid transparent;
-                border-right: 4px solid transparent;
-                border-bottom: 6px solid #555;
-            }
-            QSpinBox::down-button {
+                border-left: 6px solid transparent;
+                border-right: 6px solid transparent;
+                border-bottom: 8px solid #2C3E50;
+                margin-bottom: 2px;
+            }}
+            QSpinBox::down-button {{
                 subcontrol-origin: border;
                 subcontrol-position: bottom right;
-                width: 20px;
-                border-left: 1px solid #E0E0E0;
+                width: 26px;
+                height: 20px;
+                border-left: 2px solid #E0E0E0;
                 border-top: 1px solid #E0E0E0;
                 border-bottom-right-radius: 3px;
-                background: #F5F5F5;
-            }
-            QSpinBox::down-button:hover {
-                background: #E8E8E8;
-            }
-            QSpinBox::down-arrow {
+                background: #FAFAFA;
+            }}
+            QSpinBox::down-button:hover {{
+                background: #E8F4F8;
+            }}
+            QSpinBox::down-arrow {{
                 image: none;
                 width: 0;
                 height: 0;
-                border-left: 4px solid transparent;
-                border-right: 4px solid transparent;
-                border-top: 6px solid #555;
-            }
+                border-left: 6px solid transparent;
+                border-right: 6px solid transparent;
+                border-top: 8px solid #2C3E50;
+                margin-top: 2px;
+            }}
         """)
 
         break_text = self.lang_manager.t('settings_break_time') if self.lang_manager else "휴식 시간:"

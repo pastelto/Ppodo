@@ -4,9 +4,10 @@ Allows creating, completing, and deleting tasks.
 """
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
-    QPushButton, QListWidget, QListWidgetItem, QMessageBox
+    QPushButton, QListWidget, QListWidgetItem, QMessageBox, QCheckBox
 )
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QFont
 from core.database import Database
 
 
@@ -16,15 +17,17 @@ class TaskWidget(QWidget):
     # Signal emitted when a task is selected
     task_selected = Signal(int, str)  # task_id, task_title
 
-    def __init__(self, db: Database):
+    def __init__(self, db: Database, theme_manager=None):
         """
         Initialize task widget.
 
         Args:
             db: Database instance
+            theme_manager: Theme manager for dynamic colors
         """
         super().__init__()
         self.db = db
+        self.theme_manager = theme_manager
         self.selected_task_id = None
         self._init_ui()
         self.refresh()
@@ -57,25 +60,7 @@ class TaskWidget(QWidget):
         # Task list
         self.task_list = QListWidget()
         self.task_list.itemClicked.connect(self._on_task_clicked)
-        self.task_list.setStyleSheet("""
-            QListWidget {
-                border: 1px solid #E0E0E0;
-                border-radius: 5px;
-                background-color: #FFFFFF;
-                font-size: 13px;
-            }
-            QListWidget::item {
-                padding: 12px;
-                border-bottom: 1px solid #F0F0F0;
-            }
-            QListWidget::item:selected {
-                background-color: #E63946;
-                color: #FFFFFF;
-            }
-            QListWidget::item:hover {
-                background-color: #FFE5E8;
-            }
-        """)
+        self._apply_task_list_style()
         layout.addWidget(self.task_list)
 
         # Action buttons
@@ -157,25 +142,84 @@ class TaskWidget(QWidget):
             self.complete_button.setEnabled(False)
             self.delete_button.setEnabled(False)
 
+    def _apply_task_list_style(self):
+        """Apply theme-aware styling to task list."""
+        # Get theme colors
+        if self.theme_manager:
+            focus_color = self.theme_manager.get_focus_color()
+            hover_color = self._lighten_color(focus_color, 0.85)  # Very light version
+        else:
+            focus_color = "#E63946"
+            hover_color = "#FFE5E8"
+
+        self.task_list.setStyleSheet(f"""
+            QListWidget {{
+                border: 1px solid #E0E0E0;
+                border-radius: 5px;
+                background-color: #FFFFFF;
+                font-size: 13px;
+            }}
+            QListWidget::item {{
+                padding: 12px;
+                border-bottom: 1px solid #F0F0F0;
+                color: #2C3E50;
+            }}
+            QListWidget::item:selected {{
+                background-color: {focus_color};
+                color: #FFFFFF;
+            }}
+            QListWidget::item:hover {{
+                background-color: {hover_color};
+                color: #1A1A1A;
+            }}
+        """)
+
+    def _lighten_color(self, hex_color: str, factor: float = 0.3) -> str:
+        """Lighten a hex color by blending with white."""
+        hex_color = hex_color.lstrip('#')
+        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+        # Blend with white
+        r = int(r + (255 - r) * factor)
+        g = int(g + (255 - g) * factor)
+        b = int(b + (255 - b) * factor)
+        return f'#{r:02x}{g:02x}{b:02x}'
+
     def refresh(self):
-        """Refresh task list."""
+        """Refresh task list showing both incomplete and completed tasks."""
         # Clear list
         self.task_list.clear()
 
-        # Get incomplete tasks
-        tasks = self.db.get_tasks(completed=False)
+        # Get all tasks
+        all_tasks = self.db.get_tasks()
 
-        # Add to list
-        for task in tasks:
-            item = QListWidgetItem(task['title'])
+        # Separate completed and incomplete tasks
+        incomplete_tasks = [t for t in all_tasks if not t['completed']]
+        completed_tasks = [t for t in all_tasks if t['completed']]
+
+        # Add incomplete tasks first
+        for task in incomplete_tasks:
+            item = QListWidgetItem(f"⬜ {task['title']}")
             item.setData(Qt.UserRole, task['id'])
+            item.setData(Qt.UserRole + 1, False)  # Not completed
+            self.task_list.addItem(item)
+
+        # Add completed tasks with strikethrough
+        for task in completed_tasks:
+            item = QListWidgetItem(f"✅ {task['title']}")
+            item.setData(Qt.UserRole, task['id'])
+            item.setData(Qt.UserRole + 1, True)  # Completed
+
+            # Apply strikethrough font
+            font = QFont()
+            font.setStrikeOut(True)
+            item.setFont(font)
+
+            # Make it slightly grayed out
+            item.setForeground(Qt.gray)
+
             self.task_list.addItem(item)
 
         # Update stats
-        all_tasks = self.db.get_tasks()
-        completed_tasks = [t for t in all_tasks if t['completed']]
-        incomplete_tasks = [t for t in all_tasks if not t['completed']]
-
         self.stats_label.setText(
             f"전체: {len(all_tasks)} | 완료: {len(completed_tasks)} | 진행중: {len(incomplete_tasks)}"
         )
