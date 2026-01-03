@@ -24,34 +24,46 @@ class LevelWidget(QWidget):
 
     def _init_ui(self):
         """Initialize UI components."""
+        # Ensure minimum height for full visibility
+        self.setMinimumHeight(100)
+
         layout = QVBoxLayout()
-        layout.setSpacing(10)
+        layout.setSpacing(12)
+        layout.setContentsMargins(10, 10, 10, 10)
 
         # Level and XP section
         level_layout = QHBoxLayout()
 
         self.level_label = QLabel("⭐ Level 1")
-        self.level_label.setStyleSheet("font-size: 18px; font-weight: bold; color: #E63946;")
+        self.level_label.setStyleSheet("""
+            font-size: 18px;
+            font-weight: bold;
+            color: #E63946;
+            padding: 5px;
+        """)
+        self.level_label.setMinimumHeight(30)
         level_layout.addWidget(self.level_label)
 
         level_layout.addStretch()
         layout.addLayout(level_layout)
 
-        # XP Progress bar
+        # XP Progress bar with better visibility
         self.xp_bar = QProgressBar()
         self.xp_bar.setMinimum(0)
         self.xp_bar.setMaximum(100)
         self.xp_bar.setValue(0)
         self.xp_bar.setFormat("%v / %m XP")
         self.xp_bar.setTextVisible(True)
+        self.xp_bar.setMinimumHeight(30)  # Ensure full visibility
         self.xp_bar.setStyleSheet("""
             QProgressBar {
                 border: 2px solid #E63946;
                 border-radius: 8px;
                 text-align: center;
-                height: 25px;
-                font-size: 12px;
+                min-height: 30px;
+                font-size: 13px;
                 font-weight: bold;
+                background-color: #F5F5F5;
             }
             QProgressBar::chunk {
                 background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0,
@@ -61,16 +73,27 @@ class LevelWidget(QWidget):
         """)
         layout.addWidget(self.xp_bar)
 
-        # Stats section
+        # Stats section with better spacing
         stats_layout = QHBoxLayout()
+        stats_layout.setSpacing(20)
 
         # Streak
         self.streak_label = QLabel("🔥 연속: 0일")
-        self.streak_label.setStyleSheet("font-size: 13px; font-weight: bold;")
+        self.streak_label.setStyleSheet("""
+            font-size: 14px;
+            font-weight: bold;
+            color: #2C3E50;
+            padding: 3px;
+        """)
 
         # Total time
         self.time_label = QLabel("⏰ 총 시간: 0.0h")
-        self.time_label.setStyleSheet("font-size: 13px; font-weight: bold;")
+        self.time_label.setStyleSheet("""
+            font-size: 14px;
+            font-weight: bold;
+            color: #2C3E50;
+            padding: 3px;
+        """)
 
         stats_layout.addWidget(self.streak_label)
         stats_layout.addStretch()

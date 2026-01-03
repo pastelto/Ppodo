@@ -189,7 +189,7 @@ class MainWindow(QMainWindow):
         self.tabs.setTabPosition(QTabWidget.North)
 
         # Task tab
-        self.task_widget = TaskWidget(self.db)
+        self.task_widget = TaskWidget(self.db, self.theme_manager)
         self.tabs.addTab(self.task_widget, self.lang_manager.t('tab_tasks'))
 
         # Stats tab
