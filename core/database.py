@@ -114,6 +114,25 @@ class Database:
             """)
             self.conn.commit()
 
+        # Add wine progression columns if they don't exist
+        try:
+            self.cursor.execute("SELECT total_wine_bottles FROM user_profile LIMIT 1")
+        except sqlite3.OperationalError:
+            # Add wine bottle columns
+            self.cursor.execute("""
+                ALTER TABLE user_profile ADD COLUMN total_wine_bottles INTEGER DEFAULT 0
+            """)
+            self.cursor.execute("""
+                ALTER TABLE user_profile ADD COLUMN total_wine_crates INTEGER DEFAULT 0
+            """)
+            self.cursor.execute("""
+                ALTER TABLE user_profile ADD COLUMN current_bottle_boxes INTEGER DEFAULT 0
+            """)
+            self.cursor.execute("""
+                ALTER TABLE user_profile ADD COLUMN current_crate_bottles INTEGER DEFAULT 0
+            """)
+            self.conn.commit()
+
     def _initialize_badge_definitions(self):
         """Initialize 15 badge definitions if they don't exist."""
         badges = [
@@ -252,7 +271,7 @@ class Database:
     # ========== Grape Management ==========
 
     def _add_grape(self):
-        """Add one grape and handle bunch/box completion."""
+        """Add one grape and handle bunch/box/wine progression."""
         profile = self.get_profile()
 
         # Add grape
@@ -261,6 +280,10 @@ class Database:
         new_bunches = profile['total_bunches']
         new_box_bunches = profile['current_box_bunches']
         new_boxes = profile['total_boxes']
+        new_bottle_boxes = profile.get('current_bottle_boxes', 0)
+        new_bottles = profile.get('total_wine_bottles', 0)
+        new_crate_bottles = profile.get('current_crate_bottles', 0)
+        new_crates = profile.get('total_wine_crates', 0)
 
         # Check if bunch completed (10 grapes)
         if new_bunch_grapes >= 10:
@@ -272,6 +295,18 @@ class Database:
         if new_box_bunches >= 10:
             new_boxes += 1
             new_box_bunches = 0
+            new_bottle_boxes += 1
+
+        # Check if wine bottle completed (10 boxes)
+        if new_bottle_boxes >= 10:
+            new_bottles += 1
+            new_bottle_boxes = 0
+            new_crate_bottles += 1
+
+        # Check if wine crate completed (10 bottles)
+        if new_crate_bottles >= 10:
+            new_crates += 1
+            new_crate_bottles = 0
 
         # Update profile
         self.cursor.execute("""
@@ -279,10 +314,15 @@ class Database:
                 total_grapes = ?,
                 total_bunches = ?,
                 total_boxes = ?,
+                total_wine_bottles = ?,
+                total_wine_crates = ?,
                 current_bunch_grapes = ?,
-                current_box_bunches = ?
+                current_box_bunches = ?,
+                current_bottle_boxes = ?,
+                current_crate_bottles = ?
             WHERE id = 1
-        """, (new_grapes, new_bunches, new_boxes, new_bunch_grapes, new_box_bunches))
+        """, (new_grapes, new_bunches, new_boxes, new_bottles, new_crates,
+              new_bunch_grapes, new_box_bunches, new_bottle_boxes, new_crate_bottles))
 
         # Update daily stats
         today = date.today().isoformat()

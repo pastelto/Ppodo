@@ -77,6 +77,8 @@ class MainWindow(QMainWindow):
         if self.lang_manager.get_current_language() == 'ko':
             app_title = "🍇 Ppodo (뽀도)"
         self.title_label = QLabel(app_title)
+        # Purple color for grape theme (fixed, not theme-based)
+        self.title_label.setStyleSheet("font-size: 20px; font-weight: bold; color: #8B5A8D;")
         header_layout.addWidget(self.title_label)
 
         header_layout.addStretch()
@@ -254,10 +256,8 @@ class MainWindow(QMainWindow):
         stylesheet = self.theme_manager.apply_stylesheet("main", is_focus)
         self.setStyleSheet(stylesheet)
 
-        # Apply theme color to app title
-        if hasattr(self, 'title_label'):
-            theme_color = self.theme_manager.get_focus_color()
-            self.title_label.setStyleSheet(f"font-size: 20px; font-weight: bold; color: {theme_color};")
+        # Keep app title purple (grape theme) - don't change it
+        # The purple color is set in _init_ui and stays fixed
 
         # Apply to level widget
         if hasattr(self, 'level_widget'):

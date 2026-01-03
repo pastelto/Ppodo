@@ -49,6 +49,14 @@ class MiniWindow(QWidget):
         # Compact size for mini window; tuned paddings to avoid clipping
         self.setFixedSize(350, 240)
 
+        # Light purple background for grape theme
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #F3E5F5;
+                border-radius: 10px;
+            }
+        """)
+
         layout = QVBoxLayout()
         # Reduced padding and spacing to ensure time label fits
         layout.setContentsMargins(12, 12, 12, 12)
@@ -61,7 +69,8 @@ class MiniWindow(QWidget):
         if self.theme_manager and hasattr(self.theme_manager, 'lang_manager'):
             app_name = f"🍇 {self.theme_manager.lang_manager.t('app_name')}"
         title = QLabel(app_name)
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #E63946;")
+        # Purple color for grape theme
+        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #8B5A8D;")
         header_layout.addWidget(title)
 
         header_layout.addStretch()
