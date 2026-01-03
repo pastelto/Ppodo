@@ -90,9 +90,9 @@ class SettingsDialog(QDialog):
                 image: none;
                 width: 0;
                 height: 0;
-                border-left: 6px solid transparent;
-                border-right: 6px solid transparent;
-                border-bottom: 8px solid #2C3E50;
+                border-left: 7px solid transparent;
+                border-right: 7px solid transparent;
+                border-bottom: 10px solid #000000;
                 margin-bottom: 2px;
             }}
             QSpinBox::down-button {{
@@ -112,9 +112,9 @@ class SettingsDialog(QDialog):
                 image: none;
                 width: 0;
                 height: 0;
-                border-left: 6px solid transparent;
-                border-right: 6px solid transparent;
-                border-top: 8px solid #2C3E50;
+                border-left: 7px solid transparent;
+                border-right: 7px solid transparent;
+                border-top: 10px solid #000000;
                 margin-top: 2px;
             }}
         """)
@@ -161,9 +161,9 @@ class SettingsDialog(QDialog):
                 image: none;
                 width: 0;
                 height: 0;
-                border-left: 6px solid transparent;
-                border-right: 6px solid transparent;
-                border-bottom: 8px solid #2C3E50;
+                border-left: 7px solid transparent;
+                border-right: 7px solid transparent;
+                border-bottom: 10px solid #000000;
                 margin-bottom: 2px;
             }}
             QSpinBox::down-button {{
@@ -183,9 +183,9 @@ class SettingsDialog(QDialog):
                 image: none;
                 width: 0;
                 height: 0;
-                border-left: 6px solid transparent;
-                border-right: 6px solid transparent;
-                border-top: 8px solid #2C3E50;
+                border-left: 7px solid transparent;
+                border-right: 7px solid transparent;
+                border-top: 10px solid #000000;
                 margin-top: 2px;
             }}
         """)
@@ -218,7 +218,7 @@ class SettingsDialog(QDialog):
 
         self.language_combo.setStyleSheet("""
             QComboBox {
-                padding: 8px;
+                padding: 8px 30px 8px 8px;
                 font-size: 14px;
                 border: 2px solid #E0E0E0;
                 border-radius: 5px;
@@ -227,7 +227,18 @@ class SettingsDialog(QDialog):
                 border: 2px solid #E63946;
             }
             QComboBox::drop-down {
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 25px;
                 border: none;
+            }
+            QComboBox::down-arrow {
+                image: none;
+                width: 0;
+                height: 0;
+                border-left: 6px solid transparent;
+                border-right: 6px solid transparent;
+                border-top: 8px solid #000000;
             }
         """)
 

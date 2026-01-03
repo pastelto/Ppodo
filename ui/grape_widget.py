@@ -48,6 +48,7 @@ class GrapeWidget(QWidget):
         # Stage 1: Grape Bunch (포도송이)
         bunch_box = self._create_stage_box("🍇", "포도송이", "total_bunches", "current_bunch")
         self.bunch_icon = bunch_box['icon']
+        self.bunch_name = bunch_box['name']
         self.bunch_total = bunch_box['total']
         self.bunch_progress = bunch_box['progress']
         grid.addWidget(bunch_box['widget'], 0, 0)
@@ -55,6 +56,7 @@ class GrapeWidget(QWidget):
         # Stage 2: Grape Box (포도상자)
         box_box = self._create_stage_box("📦", "포도상자", "total_boxes", "current_box")
         self.box_icon = box_box['icon']
+        self.box_name = box_box['name']
         self.box_total = box_box['total']
         self.box_progress = box_box['progress']
         grid.addWidget(box_box['widget'], 0, 1)
@@ -62,6 +64,7 @@ class GrapeWidget(QWidget):
         # Stage 3: Wine Bottle (와인병)
         bottle_box = self._create_stage_box("🍷", "와인병", "total_bottles", "current_bottle")
         self.bottle_icon = bottle_box['icon']
+        self.bottle_name = bottle_box['name']
         self.bottle_total = bottle_box['total']
         self.bottle_progress = bottle_box['progress']
         grid.addWidget(bottle_box['widget'], 1, 0)
@@ -69,6 +72,7 @@ class GrapeWidget(QWidget):
         # Stage 4: Wine Crate (와인상자)
         crate_box = self._create_stage_box("🍾", "와인상자", "total_crates", "current_crate")
         self.crate_icon = crate_box['icon']
+        self.crate_name = crate_box['name']
         self.crate_total = crate_box['total']
         self.crate_progress = crate_box['progress']
         grid.addWidget(crate_box['widget'], 1, 1)
@@ -121,9 +125,22 @@ class GrapeWidget(QWidget):
         return {
             'widget': box,
             'icon': icon_label,
+            'name': name_label,
             'total': total_label,
             'progress': progress_label
         }
+
+    def resizeEvent(self, event):
+        """Handle resize to hide/show name labels on small screens."""
+        super().resizeEvent(event)
+
+        # Hide name labels when widget width is less than 400px
+        show_names = self.width() >= 400
+
+        self.bunch_name.setVisible(show_names)
+        self.box_name.setVisible(show_names)
+        self.bottle_name.setVisible(show_names)
+        self.crate_name.setVisible(show_names)
 
     def refresh(self):
         """Refresh grape collection display with wine progression."""
