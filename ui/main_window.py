@@ -279,6 +279,49 @@ class MainWindow(QMainWindow):
         if hasattr(self, 'start_button'):
             self._update_button_styles()
 
+        # Apply theme colors to header buttons
+        if hasattr(self, 'mini_button') and hasattr(self, 'toggle_tabs_button'):
+            self._update_header_button_styles()
+
+    def _update_header_button_styles(self):
+        """Update header button styles (mini mode, toggle tabs) based on current theme."""
+        focus_color = self.theme_manager.get_focus_color()
+        break_color = self.theme_manager.get_break_color()
+        focus_hover = self._darken_color(focus_color, 0.15)
+        break_hover = self._darken_color(break_color, 0.15)
+
+        # Mini button uses focus color
+        self.mini_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {focus_color};
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px 15px;
+                font-size: 13px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {focus_hover};
+            }}
+        """)
+
+        # Toggle tabs button uses break color
+        self.toggle_tabs_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {break_color};
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px 15px;
+                font-size: 13px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {break_hover};
+            }}
+        """)
+
     def _refresh_ui_language(self):
         """Refresh all UI elements with current language."""
         # Update window title
