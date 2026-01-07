@@ -598,8 +598,8 @@ class MainWindow(QMainWindow):
 
     def _on_stop(self):
         """Handle stop button click."""
-        # Confirm stop
-        if self.timer.is_running() or self.timer.is_paused():
+        # Only show confirmation during focus time
+        if (self.timer.is_running() or self.timer.is_paused()) and self.timer.is_focus():
             reply = QMessageBox.question(
                 self,
                 self.lang_manager.t('msg_stop_confirm_title'),
@@ -612,7 +612,7 @@ class MainWindow(QMainWindow):
                 return
 
             # Save partial focus time to statistics (without grape)
-            if self.current_session_id and self.timer.is_focus():
+            if self.current_session_id:
                 # Get elapsed time in seconds
                 elapsed_seconds = self.timer.total_seconds - self.timer.remaining_seconds
                 # Complete session without collecting grape
