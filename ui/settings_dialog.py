@@ -249,6 +249,53 @@ class SettingsDialog(QDialog):
         lang_group.setLayout(lang_layout)
         layout.addWidget(lang_group)
 
+        # Storage backend settings group
+        storage_group = QGroupBox("💾 데이터 저장소" if not self.lang_manager else "💾 Storage Backend")
+        storage_layout = QFormLayout()
+        storage_layout.setSpacing(15)
+
+        self.storage_combo = QComboBox()
+        self.storage_combo.addItem("🗄️  로컬 SQLite (기본)" if not self.lang_manager else "🗄️  Local SQLite (default)", "local")
+        self.storage_combo.addItem("📝 Notion Database (준비중)" if not self.lang_manager else "📝 Notion Database (coming soon)", "notion")
+        self.storage_combo.addItem("☁️  Supabase (준비중)" if not self.lang_manager else "☁️  Supabase (coming soon)", "supabase")
+
+        # Disable non-local options for now
+        self.storage_combo.model().item(1).setEnabled(False)
+        self.storage_combo.model().item(2).setEnabled(False)
+
+        self.storage_combo.setStyleSheet("""
+            QComboBox {
+                padding: 8px 30px 8px 8px;
+                font-size: 14px;
+                border: 2px solid #E0E0E0;
+                border-radius: 5px;
+            }
+            QComboBox:focus {
+                border: 2px solid #457B9D;
+            }
+            QComboBox::drop-down {
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 25px;
+                border: none;
+            }
+            QComboBox::down-arrow {
+                image: none;
+                width: 0;
+                height: 0;
+                border-left: 6px solid transparent;
+                border-right: 6px solid transparent;
+                border-top: 8px solid #000000;
+            }
+        """)
+
+        storage_label = QLabel("저장소 선택:" if not self.lang_manager else "Storage:")
+        storage_label.setStyleSheet("font-size: 14px; font-weight: bold;")
+        storage_layout.addRow(storage_label, self.storage_combo)
+
+        storage_group.setLayout(storage_layout)
+        layout.addWidget(storage_group)
+
         # Info label
         info_text = self.lang_manager.t('settings_info') if self.lang_manager else "💡 타이머가 실행 중이 아닐 때만 설정을 변경할 수 있습니다."
         info = QLabel(info_text)
@@ -333,7 +380,8 @@ class SettingsDialog(QDialog):
         Get current settings.
 
         Returns:
-            Tuple of (focus_minutes, break_minutes, language_code)
+            Tuple of (focus_minutes, break_minutes, language_code, storage_backend)
         """
         language_code = self.language_combo.currentData() if self.language_combo.currentData() else 'ko'
-        return (self.focus_spinbox.value(), self.break_spinbox.value(), language_code)
+        storage_backend = self.storage_combo.currentData() if self.storage_combo.currentData() else 'local'
+        return (self.focus_spinbox.value(), self.break_spinbox.value(), language_code, storage_backend)

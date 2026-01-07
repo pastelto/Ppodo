@@ -14,15 +14,17 @@ from core.database import Database
 class StatsWidget(QWidget):
     """Widget for displaying statistics and charts."""
 
-    def __init__(self, db: Database):
+    def __init__(self, db: Database, theme_manager=None):
         """
         Initialize stats widget.
 
         Args:
             db: Database instance
+            theme_manager: Theme manager instance for color theming
         """
         super().__init__()
         self.db = db
+        self.theme_manager = theme_manager
         self._init_ui()
 
     def _init_ui(self):
@@ -91,12 +93,21 @@ class StatsWidget(QWidget):
         # Format dates for display (MM/DD)
         labels = [datetime.fromisoformat(d).strftime("%m/%d") for d in dates]
 
+        # Get theme colors
+        if self.theme_manager:
+            focus_color = self.theme_manager.get_focus_color()
+            # Darken for edge color
+            edge_color = self._darken_color(focus_color)
+        else:
+            focus_color = '#457B9D'  # Default Nordic blue
+            edge_color = '#2C5F7D'
+
         # Clear previous chart
         self.weekly_canvas.figure.clear()
 
         # Create bar chart
         ax = self.weekly_canvas.figure.add_subplot(111)
-        bars = ax.bar(labels, hours, color='#E63946', alpha=0.8, edgecolor='#C02030', linewidth=1.5)
+        bars = ax.bar(labels, hours, color=focus_color, alpha=0.8, edgecolor=edge_color, linewidth=1.5)
 
         # Styling
         ax.set_xlabel('날짜', fontsize=11, fontweight='bold')
@@ -141,8 +152,23 @@ class StatsWidget(QWidget):
                 labels = labels[:5] + ['기타']
                 sizes = sizes[:5] + [sum(sizes[5:])]
 
-            # Color palette
-            colors = ['#E63946', '#F77F00', '#FCBF49', '#06AED5', '#118AB2', '#073B4C']
+            # Color palette - uses theme colors if available, otherwise Nordic palette
+            if self.theme_manager:
+                focus_color = self.theme_manager.get_focus_color()
+                break_color = self.theme_manager.get_break_color()
+                pause_color = self.theme_manager.get_pause_color()
+                # Generate variations
+                colors = [
+                    focus_color,
+                    break_color,
+                    pause_color,
+                    self._lighten_color(focus_color),
+                    self._lighten_color(break_color),
+                    self._darken_color(pause_color)
+                ]
+            else:
+                # Default Nordic palette (no red)
+                colors = ['#457B9D', '#A8DADC', '#E9C46A', '#2C5F7D', '#7FB8C0', '#D4A373']
 
             ax = self.task_canvas.figure.add_subplot(111)
             wedges, texts, autotexts = ax.pie(
@@ -164,3 +190,17 @@ class StatsWidget(QWidget):
 
         self.task_canvas.figure.tight_layout()
         self.task_canvas.draw()
+
+    def _darken_color(self, hex_color: str, factor: float = 0.7) -> str:
+        """Darken a hex color."""
+        hex_color = hex_color.lstrip('#')
+        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+        r, g, b = int(r * factor), int(g * factor), int(b * factor)
+        return f'#{r:02x}{g:02x}{b:02x}'
+
+    def _lighten_color(self, hex_color: str, factor: float = 1.3) -> str:
+        """Lighten a hex color."""
+        hex_color = hex_color.lstrip('#')
+        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+        r, g, b = min(255, int(r * factor)), min(255, int(g * factor)), min(255, int(b * factor))
+        return f'#{r:02x}{g:02x}{b:02x}'

@@ -201,7 +201,7 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.history_widget, "📜 기록")
 
         # Stats tab
-        self.stats_widget = StatsWidget(self.db)
+        self.stats_widget = StatsWidget(self.db, self.theme_manager)
         self.tabs.addTab(self.stats_widget, self.lang_manager.t('tab_stats'))
 
         # Badge tab
@@ -210,6 +210,9 @@ class MainWindow(QMainWindow):
 
         self.content_splitter.addWidget(self.tabs)
         self.content_splitter.setSizes([400, 600])
+
+        # Connect tab change event to refresh widgets
+        self.tabs.currentChanged.connect(self._on_tab_changed)
 
         main_layout.addWidget(self.content_splitter)
 
@@ -467,7 +470,7 @@ class MainWindow(QMainWindow):
             self.lang_manager, self.theme_manager, self
         )
         if dialog.exec():
-            focus, break_time, language = dialog.get_settings()
+            focus, break_time, language, storage_backend = dialog.get_settings()
             self.timer.set_durations(focus, break_time)
 
             # Handle language change
@@ -475,6 +478,14 @@ class MainWindow(QMainWindow):
                 self.lang_manager.set_language(language)
                 self.db.set_language(language)
                 self._refresh_ui_language()
+
+            # Handle storage backend change (currently only local is supported)
+            if storage_backend != 'local':
+                QMessageBox.information(
+                    self,
+                    "준비 중" if self.lang_manager.get_current_language() == 'ko' else "Coming Soon",
+                    "Notion Database와 Supabase 연동은 향후 업데이트에서 제공될 예정입니다." if self.lang_manager.get_current_language() == 'ko' else "Notion Database and Supabase integration will be available in future updates."
+                )
 
             # Update timer display
             self.timer_widget.update_display()
@@ -713,6 +724,18 @@ class MainWindow(QMainWindow):
             # Also update mini window if it exists
             if self.mini_window:
                 self.mini_window.set_current_task(task_title)
+
+    def _on_tab_changed(self, index: int):
+        """Handle tab change event."""
+        # Refresh stats widget when stats tab is selected
+        if self.tabs.widget(index) == self.stats_widget:
+            self.stats_widget.refresh()
+        # Refresh history widget when history tab is selected
+        elif self.tabs.widget(index) == self.history_widget:
+            self.history_widget.refresh()
+        # Refresh badge widget when badge tab is selected
+        elif self.tabs.widget(index) == self.badge_widget:
+            self.badge_widget.refresh()
 
     def closeEvent(self, event):
         """Handle window close event."""

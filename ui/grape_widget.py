@@ -24,7 +24,7 @@ class GrapeWidget(QWidget):
 
     def _init_ui(self):
         """Initialize UI components with 2x2 grid layout."""
-        self.setMinimumWidth(320)
+        self.setMinimumWidth(280)  # Reduced for better small screen support
         layout = QVBoxLayout()
         layout.setSpacing(12)
         layout.setContentsMargins(15, 15, 15, 15)
@@ -131,16 +131,54 @@ class GrapeWidget(QWidget):
         }
 
     def resizeEvent(self, event):
-        """Handle resize to hide/show name labels on small screens."""
+        """Handle resize to adjust layout for small screens."""
         super().resizeEvent(event)
 
-        # Hide name labels when widget width is less than 400px
-        show_names = self.width() >= 400
+        width = self.width()
 
+        # Adaptive sizing based on width
+        if width < 350:
+            # Very small: Only icons with smaller size
+            show_names = False
+            icon_size = 28
+            total_size = 16
+            progress_size = 9
+        elif width < 400:
+            # Small: Icons only, normal size
+            show_names = False
+            icon_size = 36
+            total_size = 20
+            progress_size = 11
+        else:
+            # Normal: Show everything
+            show_names = True
+            icon_size = 36
+            total_size = 20
+            progress_size = 11
+
+        # Update visibility
         self.bunch_name.setVisible(show_names)
         self.box_name.setVisible(show_names)
         self.bottle_name.setVisible(show_names)
         self.crate_name.setVisible(show_names)
+
+        # Update icon sizes
+        self.bunch_icon.setStyleSheet(f"font-size: {icon_size}px;")
+        self.box_icon.setStyleSheet(f"font-size: {icon_size}px;")
+        self.bottle_icon.setStyleSheet(f"font-size: {icon_size}px;")
+        self.crate_icon.setStyleSheet(f"font-size: {icon_size}px;")
+
+        # Update total label sizes
+        self.bunch_total.setStyleSheet(f"font-size: {total_size}px; font-weight: bold; color: #8B5A8D;")
+        self.box_total.setStyleSheet(f"font-size: {total_size}px; font-weight: bold; color: #8B5A8D;")
+        self.bottle_total.setStyleSheet(f"font-size: {total_size}px; font-weight: bold; color: #8B5A8D;")
+        self.crate_total.setStyleSheet(f"font-size: {total_size}px; font-weight: bold; color: #8B5A8D;")
+
+        # Update progress label sizes
+        self.bunch_progress.setStyleSheet(f"font-size: {progress_size}px; color: #666;")
+        self.box_progress.setStyleSheet(f"font-size: {progress_size}px; color: #666;")
+        self.bottle_progress.setStyleSheet(f"font-size: {progress_size}px; color: #666;")
+        self.crate_progress.setStyleSheet(f"font-size: {progress_size}px; color: #666;")
 
     def refresh(self):
         """Refresh grape collection display with wine progression."""
