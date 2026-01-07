@@ -225,6 +225,14 @@ class Database:
         self.cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
         self.conn.commit()
 
+    def update_task(self, task_id: int, new_title: str):
+        """Update task title."""
+        self.cursor.execute("""
+            UPDATE tasks SET title = ?
+            WHERE id = ?
+        """, (new_title, task_id))
+        self.conn.commit()
+
     # ========== Focus Session Management ==========
 
     def start_session(self, task_id: Optional[int] = None, duration: int = 25) -> int:

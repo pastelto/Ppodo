@@ -253,8 +253,16 @@ All data is stored in local SQLite database (`ppodo.db`).
 - [ ] Seasonal limited badges
 - [ ] Challenge system
 
-### Phase 4 (Social Features)
+### Phase 4 (Storage & Cloud Integration)
+- [ ] Multiple storage backend support
+  - [x] Local SQLite (default)
+  - [ ] Notion Database integration
+  - [ ] Supabase integration
 - [ ] Cloud synchronization
+- [ ] Data migration tool
+- [ ] Real-time backup feature
+
+### Phase 5 (Social Features)
 - [ ] Compare with friends
 - [ ] Weekly rankings
 - [ ] Share badges

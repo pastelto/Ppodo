@@ -250,8 +250,16 @@ Ppodo/
 - [ ] 시즌별 한정 뱃지
 - [ ] 도전 과제 시스템
 
-### Phase 4 (Social Features)
+### Phase 4 (Storage & Cloud Integration)
+- [ ] 다중 스토리지 백엔드 지원
+  - [x] 로컬 SQLite (기본)
+  - [ ] Notion Database 연동
+  - [ ] Supabase 연동
 - [ ] 클라우드 동기화
+- [ ] 데이터 마이그레이션 도구
+- [ ] 실시간 백업 기능
+
+### Phase 5 (Social Features)
 - [ ] 친구와 비교
 - [ ] 주간 랭킹
 - [ ] 뱃지 공유하기

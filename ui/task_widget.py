@@ -4,7 +4,8 @@ Allows creating, completing, and deleting tasks.
 """
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
-    QPushButton, QListWidget, QListWidgetItem, QMessageBox, QCheckBox
+    QPushButton, QListWidget, QListWidgetItem, QMessageBox, QCheckBox,
+    QInputDialog
 )
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
@@ -72,6 +73,7 @@ class TaskWidget(QWidget):
         # Task list
         self.task_list = QListWidget()
         self.task_list.itemClicked.connect(self._on_task_clicked)
+        self.task_list.itemDoubleClicked.connect(self._on_task_double_clicked)
         # Prevent focus on click
         self.task_list.setFocusPolicy(Qt.NoFocus)
         self._apply_task_list_style()
@@ -320,10 +322,20 @@ class TaskWidget(QWidget):
 
     def _on_task_clicked(self, item: QListWidgetItem):
         """Handle task item click."""
-        self.selected_task_id = item.data(Qt.UserRole)
-        task_title = item.text()
+        is_completed = item.data(Qt.UserRole + 1)
 
-        # Enable buttons
+        # Disable selection of completed tasks
+        if is_completed:
+            item.setSelected(False)
+            return
+
+        self.selected_task_id = item.data(Qt.UserRole)
+        task_title_with_icon = item.text()
+
+        # Remove status icon (⬜ or ✅) from title
+        task_title = task_title_with_icon.replace("⬜ ", "").replace("✅ ", "")
+
+        # Enable buttons only for incomplete tasks
         self.complete_button.setEnabled(True)
         self.delete_button.setEnabled(True)
 
@@ -333,8 +345,34 @@ class TaskWidget(QWidget):
         # Clear focus from input box
         self.task_input.clearFocus()
 
-        # Emit signal
+        # Emit signal with clean title (no icons)
         self.task_selected.emit(self.selected_task_id, task_title)
+
+    def _on_task_double_clicked(self, item: QListWidgetItem):
+        """Handle task item double-click for editing."""
+        is_completed = item.data(Qt.UserRole + 1)
+
+        # Only allow editing incomplete tasks
+        if is_completed:
+            return
+
+        task_id = item.data(Qt.UserRole)
+        current_title = item.text().replace("⬜ ", "")
+
+        # Show input dialog
+        new_title, ok = QInputDialog.getText(
+            self,
+            "할 일 수정",
+            "새 제목:",
+            QLineEdit.Normal,
+            current_title
+        )
+
+        if ok and new_title.strip():
+            # Update database
+            self.db.update_task(task_id, new_title.strip())
+            # Refresh list
+            self.refresh()
 
     def get_selected_task(self):
         """Get currently selected task."""
