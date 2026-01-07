@@ -62,8 +62,8 @@ class MiniWindow(QWidget):
 
         layout = QVBoxLayout()
         # Reduced padding and spacing to ensure time label fits
-        layout.setContentsMargins(12, 12, 12, 12)
-        layout.setSpacing(10)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(0)  # Control spacing manually
 
         # Header with restore button
         header_layout = QHBoxLayout()
@@ -127,6 +127,7 @@ class MiniWindow(QWidget):
         header_layout.addWidget(self.close_button)
 
         layout.addLayout(header_layout)
+        layout.addSpacing(12)  # Space after header
 
         # State indicator
         self.state_label = QLabel("⏸ 대기 중")
@@ -135,9 +136,12 @@ class MiniWindow(QWidget):
             font-size: 13px;
             font-weight: bold;
             color: #666;
-            padding: 3px;
+            padding: 5px;
+            background-color: #F5F5F5;
+            border-radius: 5px;
         """)
         layout.addWidget(self.state_label)
+        layout.addSpacing(12)  # Space after state
 
         # Timer display - larger and more visible
         self.time_label = QLabel("25:00")
@@ -146,9 +150,16 @@ class MiniWindow(QWidget):
         font = QFont('Consolas', 40)
         font.setBold(True)
         self.time_label.setFont(font)
-        # Reduced padding so large digits don't overflow into controls
-        self.time_label.setStyleSheet("color: #2B2D42; padding: 8px;")
-        layout.addWidget(self.time_label, 1)  # Give it stretch priority
+        # Add background and padding for visual separation
+        self.time_label.setStyleSheet("""
+            color: #2B2D42;
+            padding: 10px;
+            background-color: #FFFFFF;
+            border: 2px solid #E0E0E0;
+            border-radius: 8px;
+        """)
+        layout.addWidget(self.time_label)
+        layout.addSpacing(10)  # Space after timer
 
         # Task label - shows current task
         self.task_label = QLabel("")
@@ -157,13 +168,16 @@ class MiniWindow(QWidget):
         self.task_label.setStyleSheet("""
             font-size: 11px;
             color: #666;
-            padding: 3px;
+            padding: 5px;
+            background-color: #FAFAFA;
+            border-radius: 5px;
         """)
         layout.addWidget(self.task_label)
+        layout.addSpacing(12)  # Space before buttons
 
         # Control buttons with consistent spacing
         button_layout = QHBoxLayout()
-        button_layout.setSpacing(10)  # Reduced spacing between buttons
+        button_layout.setSpacing(12)  # Space between buttons
 
         self.start_pause_button = QPushButton("▶")
         self.start_pause_button.setFixedSize(55, 45)  # Slightly larger buttons
@@ -312,6 +326,8 @@ class MiniWindow(QWidget):
             font-weight: bold;
             color: {color};
             padding: 5px;
+            background-color: #F5F5F5;
+            border-radius: 5px;
         """)
 
         # Update button state
