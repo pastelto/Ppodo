@@ -50,7 +50,7 @@ class MiniWindow(QWidget):
     def _init_ui(self):
         """Initialize UI components."""
         # Compact size for mini window; tuned paddings to avoid clipping
-        self.setFixedSize(350, 240)
+        self.setFixedSize(380, 260)
 
         # Light purple background for grape theme
         self.setStyleSheet("""
@@ -177,10 +177,11 @@ class MiniWindow(QWidget):
 
         # Control buttons with consistent spacing
         button_layout = QHBoxLayout()
-        button_layout.setSpacing(12)  # Space between buttons
+        button_layout.setSpacing(15)  # Space between buttons
+        button_layout.setContentsMargins(0, 0, 0, 0)
 
         self.start_pause_button = QPushButton("▶")
-        self.start_pause_button.setFixedSize(55, 45)  # Slightly larger buttons
+        self.start_pause_button.setFixedSize(60, 48)  # Larger buttons with more space
         self.start_pause_button.clicked.connect(self._on_start_pause)
         self.start_pause_button.setStyleSheet(f"""
             QPushButton {{
@@ -196,7 +197,7 @@ class MiniWindow(QWidget):
         """)
         # Make stop button a white square with colored border and icon only
         self.stop_button = QPushButton("⏹")
-        self.stop_button.setFixedSize(55, 45)  # Matching button size
+        self.stop_button.setFixedSize(60, 48)  # Matching button size
         self.stop_button.setEnabled(False)
         self.stop_button.clicked.connect(self._on_stop)
         self.stop_button.setStyleSheet(f"""
@@ -216,12 +217,13 @@ class MiniWindow(QWidget):
             }}
         """)
 
-        button_layout.addStretch()
+        button_layout.addStretch(1)
         button_layout.addWidget(self.start_pause_button)
         button_layout.addWidget(self.stop_button)
-        button_layout.addStretch()
+        button_layout.addStretch(1)
 
         layout.addLayout(button_layout)
+        layout.addSpacing(5)  # Bottom padding
 
         self.setLayout(layout)
 
