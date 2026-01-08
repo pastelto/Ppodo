@@ -3,7 +3,7 @@ Database module for Ppodo application.
 Manages SQLite database with tables for tasks, sessions, stats, profile, and badges.
 """
 import sqlite3
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
 
@@ -460,17 +460,18 @@ class Database:
         return [(row[0], row[1] or 0) for row in self.cursor.fetchall()]
 
     def get_task_distribution(self) -> List[Tuple[str, int]]:
-        """Get today's task time distribution."""
-        today = date.today().isoformat()
+        """Get weekly task time distribution (last 7 days)."""
+        # Get data from last 7 days instead of just today
+        week_ago = (date.today() - timedelta(days=6)).isoformat()
 
         self.cursor.execute("""
             SELECT t.title, SUM(fs.duration_minutes) as total_minutes
             FROM focus_sessions fs
             JOIN tasks t ON fs.task_id = t.id
-            WHERE DATE(fs.started_at) = ? AND fs.completed = 1
+            WHERE DATE(fs.started_at) >= ? AND fs.completed = 1
             GROUP BY t.id, t.title
             ORDER BY total_minutes DESC
-        """, (today,))
+        """, (week_ago,))
 
         return [(row[0], row[1] or 0) for row in self.cursor.fetchall()]
 

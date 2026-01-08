@@ -144,10 +144,11 @@ class MiniWindow(QWidget):
         layout.addWidget(self.state_label)
         layout.addSpacing(8)  # Space after state
 
-        # Timer container box - separate from task
-        timer_container = QVBoxLayout()
-        timer_container.setSpacing(0)
-        timer_container.setContentsMargins(0, 0, 0, 0)
+        # Timer box - independent and prominent
+        self.timer_box = QWidget()
+        timer_box_layout = QVBoxLayout()
+        timer_box_layout.setContentsMargins(8, 8, 8, 8)
+        timer_box_layout.setSpacing(0)
 
         # Timer display - larger and more visible
         self.time_label = QLabel("25:00")
@@ -157,22 +158,28 @@ class MiniWindow(QWidget):
         font = QFont('Consolas', 38)  # Slightly smaller for better fit
         font.setBold(True)
         self.time_label.setFont(font)
-        # Add background and padding for visual separation
-        self.time_label.setStyleSheet("""
-            color: #2B2D42;
-            padding: 12px 10px;
-            background-color: #FFFFFF;
-            border: 2px solid #E0E0E0;
-            border-radius: 8px;
-        """)
-        timer_container.addWidget(self.time_label)
-        layout.addLayout(timer_container)
-        layout.addSpacing(8)  # Space between timer and task
+        self.time_label.setStyleSheet("color: #2B2D42; padding: 12px 10px;")
 
-        # Task container box - separate from timer
-        task_container = QVBoxLayout()
-        task_container.setSpacing(0)
-        task_container.setContentsMargins(0, 0, 0, 0)
+        timer_box_layout.addWidget(self.time_label)
+        self.timer_box.setLayout(timer_box_layout)
+
+        # Style timer box as independent container
+        self.timer_box.setStyleSheet("""
+            QWidget {
+                background-color: #FFFFFF;
+                border: 3px solid #D0D0D0;
+                border-radius: 10px;
+            }
+        """)
+
+        layout.addWidget(self.timer_box)
+        layout.addSpacing(12)  # Increased space between timer and task
+
+        # Task box - independent and separate
+        self.task_box = QWidget()
+        task_box_layout = QVBoxLayout()
+        task_box_layout.setContentsMargins(8, 6, 8, 6)
+        task_box_layout.setSpacing(0)
 
         # Task label - shows current task
         self.task_label = QLabel("")
@@ -180,16 +187,21 @@ class MiniWindow(QWidget):
         self.task_label.setWordWrap(True)
         self.task_label.setMinimumHeight(24)  # Ensure consistent height
         self.task_label.setMaximumHeight(40)  # Prevent excessive expansion
-        self.task_label.setStyleSheet("""
-            font-size: 11px;
-            color: #666;
-            padding: 6px 8px;
-            background-color: #FAFAFA;
-            border: 1px solid #E0E0E0;
-            border-radius: 5px;
+        self.task_label.setStyleSheet("font-size: 11px; color: #666; padding: 2px;")
+
+        task_box_layout.addWidget(self.task_label)
+        self.task_box.setLayout(task_box_layout)
+
+        # Style task box as independent container
+        self.task_box.setStyleSheet("""
+            QWidget {
+                background-color: #F8F8F8;
+                border: 2px solid #D8D8D8;
+                border-radius: 8px;
+            }
         """)
-        task_container.addWidget(self.task_label)
-        layout.addLayout(task_container)
+
+        layout.addWidget(self.task_box)
         layout.addSpacing(10)  # Space before buttons
 
         # Control buttons with consistent spacing
