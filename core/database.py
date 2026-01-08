@@ -233,6 +233,14 @@ class Database:
         """, (new_title, task_id))
         self.conn.commit()
 
+    def uncomplete_task(self, task_id: int):
+        """Mark a completed task as incomplete."""
+        self.cursor.execute("""
+            UPDATE tasks SET completed = 0, completed_at = NULL
+            WHERE id = ?
+        """, (task_id,))
+        self.conn.commit()
+
     # ========== Focus Session Management ==========
 
     def start_session(self, task_id: Optional[int] = None, duration: int = 25) -> int:

@@ -146,34 +146,37 @@ class MiniWindow(QWidget):
         # Timer display - larger and more visible
         self.time_label = QLabel("25:00")
         self.time_label.setAlignment(Qt.AlignCenter)
-        self.time_label.setMinimumHeight(60)  # Ensure full visibility without overlapping
-        font = QFont('Consolas', 40)
+        self.time_label.setMinimumHeight(70)  # Increased to prevent clipping
+        self.time_label.setMaximumHeight(90)  # Prevent excessive expansion
+        font = QFont('Consolas', 38)  # Slightly smaller for better fit
         font.setBold(True)
         self.time_label.setFont(font)
         # Add background and padding for visual separation
         self.time_label.setStyleSheet("""
             color: #2B2D42;
-            padding: 10px;
+            padding: 12px 10px;
             background-color: #FFFFFF;
             border: 2px solid #E0E0E0;
             border-radius: 8px;
         """)
         layout.addWidget(self.time_label)
-        layout.addSpacing(10)  # Space after timer
+        layout.addSpacing(12)  # Increased space after timer
 
         # Task label - shows current task
         self.task_label = QLabel("")
         self.task_label.setAlignment(Qt.AlignCenter)
         self.task_label.setWordWrap(True)
+        self.task_label.setMinimumHeight(24)  # Ensure consistent height
+        self.task_label.setMaximumHeight(40)  # Prevent excessive expansion
         self.task_label.setStyleSheet("""
             font-size: 11px;
             color: #666;
-            padding: 5px;
+            padding: 6px 8px;
             background-color: #FAFAFA;
             border-radius: 5px;
         """)
         layout.addWidget(self.task_label)
-        layout.addSpacing(12)  # Space before buttons
+        layout.addSpacing(10)  # Space before buttons
 
         # Control buttons with consistent spacing
         button_layout = QHBoxLayout()
