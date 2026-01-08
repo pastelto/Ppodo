@@ -72,8 +72,8 @@ class MiniWindow(QWidget):
         if self.theme_manager and hasattr(self.theme_manager, 'lang_manager'):
             app_name = f"🍇 {self.theme_manager.lang_manager.t('app_name')}"
         title = QLabel(app_name)
-        # Purple color for grape theme
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #8B5A8D;")
+        # Purple color for grape theme, no border
+        title.setStyleSheet("font-size: 14px; font-weight: bold; color: #8B5A8D; border: none;")
         header_layout.addWidget(title)
 
         header_layout.addStretch()
@@ -107,6 +107,7 @@ class MiniWindow(QWidget):
             }}
         """)
         header_layout.addWidget(self.restore_button)
+        header_layout.addSpacing(8)  # Add spacing between buttons
 
         self.close_button = QPushButton("✕")
         self.close_button.setToolTip("닫기")
@@ -141,7 +142,12 @@ class MiniWindow(QWidget):
             border-radius: 5px;
         """)
         layout.addWidget(self.state_label)
-        layout.addSpacing(12)  # Space after state
+        layout.addSpacing(8)  # Space after state
+
+        # Timer container box - separate from task
+        timer_container = QVBoxLayout()
+        timer_container.setSpacing(0)
+        timer_container.setContentsMargins(0, 0, 0, 0)
 
         # Timer display - larger and more visible
         self.time_label = QLabel("25:00")
@@ -159,8 +165,14 @@ class MiniWindow(QWidget):
             border: 2px solid #E0E0E0;
             border-radius: 8px;
         """)
-        layout.addWidget(self.time_label)
-        layout.addSpacing(12)  # Increased space after timer
+        timer_container.addWidget(self.time_label)
+        layout.addLayout(timer_container)
+        layout.addSpacing(8)  # Space between timer and task
+
+        # Task container box - separate from timer
+        task_container = QVBoxLayout()
+        task_container.setSpacing(0)
+        task_container.setContentsMargins(0, 0, 0, 0)
 
         # Task label - shows current task
         self.task_label = QLabel("")
@@ -173,9 +185,11 @@ class MiniWindow(QWidget):
             color: #666;
             padding: 6px 8px;
             background-color: #FAFAFA;
+            border: 1px solid #E0E0E0;
             border-radius: 5px;
         """)
-        layout.addWidget(self.task_label)
+        task_container.addWidget(self.task_label)
+        layout.addLayout(task_container)
         layout.addSpacing(10)  # Space before buttons
 
         # Control buttons with consistent spacing

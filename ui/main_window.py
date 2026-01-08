@@ -249,6 +249,7 @@ class MainWindow(QMainWindow):
         # Timer signals
         self.timer.focus_completed.connect(self._on_focus_completed)
         self.timer.break_completed.connect(self._on_break_completed)
+        self.timer.state_changed.connect(self._on_timer_state_changed)
 
         # Task selection signal
         self.task_widget.task_selected.connect(self._on_task_selected)
@@ -595,6 +596,24 @@ class MainWindow(QMainWindow):
         self.timer.pause()
         self.start_button.setEnabled(True)
         self.pause_button.setEnabled(False)
+
+    def _on_timer_state_changed(self, state: str):
+        """Handle timer state changes to sync button states between mini and main window."""
+        if state == "idle":
+            # Timer is stopped
+            self.start_button.setEnabled(True)
+            self.pause_button.setEnabled(False)
+            self.stop_button.setEnabled(False)
+        elif state in ("focus", "break"):
+            # Timer is running
+            self.start_button.setEnabled(False)
+            self.pause_button.setEnabled(True)
+            self.stop_button.setEnabled(True)
+        elif state == "paused":
+            # Timer is paused
+            self.start_button.setEnabled(True)
+            self.pause_button.setEnabled(False)
+            self.stop_button.setEnabled(True)
 
     def _on_stop(self):
         """Handle stop button click."""
