@@ -31,7 +31,6 @@ class TaskWidget(QWidget):
         self.theme_manager = theme_manager
         self.selected_task_id = None
         self.selected_task_completed = False  # Track if selected task is completed
-        self.hide_completed = False  # Track hide completed checkbox state
         self._init_ui()
         self.refresh()
 
@@ -72,22 +71,47 @@ class TaskWidget(QWidget):
         add_layout.addWidget(self.add_button)
         layout.addLayout(add_layout)
 
-        # Hide completed checkbox
-        self.hide_completed_checkbox = QCheckBox("완료된 항목 숨기기")
-        self.hide_completed_checkbox.stateChanged.connect(self._on_hide_completed_changed)
-        self.hide_completed_checkbox.setStyleSheet("""
-            QCheckBox {
-                font-size: 12px;
-                color: #666;
-                padding: 5px;
+        # Control bar for completed tasks
+        control_layout = QHBoxLayout()
+
+        # Info label
+        info_label = QLabel("💡 Ctrl+클릭으로 여러 항목 선택 가능")
+        info_label.setStyleSheet("font-size: 11px; color: #999;")
+        control_layout.addWidget(info_label)
+
+        control_layout.addStretch()
+
+        # Hide selected completed tasks button
+        self.hide_completed_button = QPushButton("🗑 선택 항목 삭제")
+        self.hide_completed_button.clicked.connect(self._on_hide_selected_completed)
+        self.hide_completed_button.setEnabled(False)
+        self.hide_completed_button.setStyleSheet("""
+            QPushButton {
+                font-size: 11px;
+                color: #E74C3C;
+                background-color: transparent;
+                border: 1px solid #E74C3C;
+                border-radius: 3px;
+                padding: 4px 10px;
+            }
+            QPushButton:hover {
+                background-color: #FFEBEE;
+            }
+            QPushButton:disabled {
+                color: #CCC;
+                border-color: #CCC;
             }
         """)
-        layout.addWidget(self.hide_completed_checkbox)
+        control_layout.addWidget(self.hide_completed_button)
 
-        # Task list
+        layout.addLayout(control_layout)
+
+        # Task list - enable multi-selection
         self.task_list = QListWidget()
+        self.task_list.setSelectionMode(QListWidget.ExtendedSelection)  # Enable Ctrl+click multi-select
         self.task_list.itemClicked.connect(self._on_task_clicked)
         self.task_list.itemDoubleClicked.connect(self._on_task_double_clicked)
+        self.task_list.itemSelectionChanged.connect(self._on_selection_changed)
         # Prevent focus on click
         self.task_list.setFocusPolicy(Qt.NoFocus)
         self._apply_task_list_style()
@@ -135,10 +159,54 @@ class TaskWidget(QWidget):
         # Refresh list
         self.refresh()
 
-    def _on_hide_completed_changed(self, state):
-        """Handle hide completed checkbox change."""
-        self.hide_completed = (state == Qt.Checked)
-        self.refresh()
+    def _on_selection_changed(self):
+        """Handle selection change - enable/disable hide button."""
+        selected_items = self.task_list.selectedItems()
+
+        # Check if any selected items are completed
+        has_completed = False
+        for item in selected_items:
+            if item.data(Qt.UserRole + 1):  # is_completed
+                has_completed = True
+                break
+
+        self.hide_completed_button.setEnabled(has_completed)
+
+    def _on_hide_selected_completed(self):
+        """Delete selected completed tasks."""
+        selected_items = self.task_list.selectedItems()
+
+        # Get completed task IDs
+        completed_task_ids = []
+        for item in selected_items:
+            if item.data(Qt.UserRole + 1):  # is_completed
+                completed_task_ids.append(item.data(Qt.UserRole))
+
+        if not completed_task_ids:
+            return
+
+        # Confirm deletion
+        reply = QMessageBox.question(
+            self,
+            "완료 항목 삭제",
+            f"{len(completed_task_ids)}개의 완료된 항목을 삭제하시겠습니까?\n삭제된 항목은 복구할 수 없습니다.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+
+        if reply == QMessageBox.Yes:
+            # Delete from database
+            for task_id in completed_task_ids:
+                self.db.delete_task(task_id)
+
+            # Refresh list
+            self.refresh()
+
+            QMessageBox.information(
+                self,
+                "삭제 완료",
+                f"{len(completed_task_ids)}개의 항목이 삭제되었습니다."
+            )
 
     def _on_action1(self):
         """Handle button 1 click (Complete or Copy)."""
@@ -354,7 +422,7 @@ class TaskWidget(QWidget):
         self._update_button_styles()
 
     def refresh(self):
-        """Refresh task list showing incomplete and optionally completed tasks."""
+        """Refresh task list showing incomplete and completed tasks."""
         # Clear list
         self.task_list.clear()
 
@@ -372,32 +440,26 @@ class TaskWidget(QWidget):
             item.setData(Qt.UserRole + 1, False)  # Not completed
             self.task_list.addItem(item)
 
-        # Add completed tasks if not hidden
-        if not self.hide_completed:
-            for task in completed_tasks:
-                item = QListWidgetItem(f"✅ {task['title']}")
-                item.setData(Qt.UserRole, task['id'])
-                item.setData(Qt.UserRole + 1, True)  # Completed
+        # Add completed tasks
+        for task in completed_tasks:
+            item = QListWidgetItem(f"✅ {task['title']}")
+            item.setData(Qt.UserRole, task['id'])
+            item.setData(Qt.UserRole + 1, True)  # Completed
 
-                # Apply strikethrough font
-                font = QFont()
-                font.setStrikeOut(True)
-                item.setFont(font)
+            # Apply strikethrough font
+            font = QFont()
+            font.setStrikeOut(True)
+            item.setFont(font)
 
-                # Make it slightly grayed out
-                item.setForeground(Qt.gray)
+            # Make it slightly grayed out
+            item.setForeground(Qt.gray)
 
-                self.task_list.addItem(item)
+            self.task_list.addItem(item)
 
         # Update stats
-        if self.hide_completed:
-            self.stats_label.setText(
-                f"진행중: {len(incomplete_tasks)} | 완료: {len(completed_tasks)} (숨김)"
-            )
-        else:
-            self.stats_label.setText(
-                f"전체: {len(all_tasks)} | 완료: {len(completed_tasks)} | 진행중: {len(incomplete_tasks)}"
-            )
+        self.stats_label.setText(
+            f"전체: {len(all_tasks)} | 완료: {len(completed_tasks)} | 진행중: {len(incomplete_tasks)}"
+        )
 
     def _on_task_clicked(self, item: QListWidgetItem):
         """Handle task item click."""
