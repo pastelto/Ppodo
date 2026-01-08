@@ -53,7 +53,7 @@ class StatsWidget(QWidget):
         layout.addWidget(self.weekly_canvas)
 
         # Task distribution chart
-        task_label = QLabel("오늘의 태스크 분포")
+        task_label = QLabel("태스크 분포 (최근 7일)")
         task_label.setStyleSheet("font-size: 14px; font-weight: bold; margin-top: 20px;")
         layout.addWidget(task_label)
 
@@ -137,7 +137,7 @@ class StatsWidget(QWidget):
         if not distribution:
             # No data - show message
             ax = self.task_canvas.figure.add_subplot(111)
-            ax.text(0.5, 0.5, '오늘은 아직 집중한 태스크가 없습니다',
+            ax.text(0.5, 0.5, '최근 7일간 집중한 태스크가 없습니다',
                    ha='center', va='center', fontsize=12, color='#999')
             ax.set_xlim(0, 1)
             ax.set_ylim(0, 1)
